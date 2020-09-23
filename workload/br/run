@@ -1,0 +1,10 @@
+#! /bin/bash
+
+workload=${1-tpcc1000}
+storage=${storage-"s3://mybucket/ycsb?access-key=YOURACCESSKEY&secret-access-key=YOURSECRETKEY&endpoint=http://172.16.4.4:30812"}
+
+bin/br restore full \
+    --log-file ${ARTIFICATS-.}/br-restore-full.log \
+    --log-level DEBUG \
+    --pd $PD_ADDR \
+    -s workload

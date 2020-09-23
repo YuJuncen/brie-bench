@@ -1,0 +1,8 @@
+#! /bin/bash
+
+hash=$1
+git clone https://github.com/pingcap/br && cd br
+
+if [ $hash ]; then
+    git reset --hard $hash
+fi

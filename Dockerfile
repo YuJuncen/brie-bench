@@ -3,15 +3,13 @@ ENV GO111MODULE=on
 ENV GOPROXY=https://goproxy.io,direct
 ENV ARTIFICATS=/artifacts
 WORKDIR /brie
-COPY . .
+COPY ./workload .
 
 RUN apk add --no-cache \
     make \
     git \
     bash \
-    curl \
-    gcc \
-    g++
+    curl 
 
 RUN mkdir $ARTIFICATS
 RUN ls /
