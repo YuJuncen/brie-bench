@@ -15,6 +15,6 @@ make build
 bin/br restore full \
     --log-file ${ARTIFICATS-.}/br-restore-full.log \
     --log-level DEBUG \
-    --pd \
+    --pd $PD_ADDR \
     -s 's3://mybucket/ycsb?access-key=YOURACCESSKEY&secret-access-key=YOURSECRETKEY' \
     --s3.endpoint 'http://172.16.4.4:30812'
