@@ -17,5 +17,4 @@ RUN apk add --no-cache \
     gcc
 
 RUN mkdir $ARTIFICATS
-RUN ls /
 CMD ["./run.sh"]

@@ -1,5 +1,27 @@
-curl 172.16.5.110:8000/api/cluster/test -XPOST -d \
-'{
+#! /bin/bash
+
+if ! source workload/utils.sh; then
+    echo "failed to load the utils package. make sure workload/utils.sh exists"
+    exit 1
+fi
+
+parse_args $@
+
+set -eu
+
+
+if [ ! $component ]; then
+    show_help
+    fail "must provide a component name"
+fi
+
+
+log component = $component
+log hash = ${hash-"default"}
+log workload = ${workload-"default"}
+
+# curl 172.16.5.110:8000/api/cluster/test -XPOST -d \
+echo '{
     "cluster_request": {
         "name": "br_version",            
         "version": "nightly"
@@ -16,10 +38,10 @@ curl 172.16.5.110:8000/api/cluster/test -XPOST -d \
     "cluster_workload": {        
         "type": "standard",               
         "docker_image": "lovecsust/brie-bench:latest",
+        "args": ["br", "-h", "cde9f30e42fc3b938a4c3ab3bbc385b47ce7e2bc"],
         "rri_item_id": 1,                      
         "artifact_dir": "/artifacts",
-        "env": {
-            "target": "br"
-        }
     }
 }'
+
+set +eu
