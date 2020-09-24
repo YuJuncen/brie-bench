@@ -1,0 +1,6 @@
+#!/bin/bash
+
+set -euv
+
+cluster_request_id=$1
+curl -s 172.16.5.110:8000/api/cluster/workload/${cluster_request_id}/artifacts | jq ${2-""}

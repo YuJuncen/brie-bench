@@ -50,6 +50,10 @@ parse_args() {
         shift
         shift
         ;;
+    --dry-run )
+        export dry_run=1
+        shift
+        ;;
     *)
         show_help
         fail "unknown flag $1"

@@ -1,13 +1,14 @@
 #! /bin/bash
 
-if ! source workload/utils.sh; then
+set -eu
+
+if ! source bin/utils.sh; then
     echo "failed to load the utils package. make sure workload/utils.sh exists"
     exit 1
 fi
 
 parse_args $@
 
-set -eu
 
 if [ ! $component ]; then
     show_help
@@ -52,6 +53,7 @@ fi
 log running with request
 log $basic_json
 
-curl 172.16.5.110:8000/api/cluster/test -XPOST -d "$basic_json"
-
+if [ ! ${dry_run-""} ]; then
+  curl 172.16.5.110:8000/api/cluster/test -XPOST -d "$basic_json"
+fi
 set +eu
