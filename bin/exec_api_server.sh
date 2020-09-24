@@ -13,7 +13,8 @@ curl 172.16.5.110:8000/api/cluster/test -XPOST -d \
         {"component": "prometheus", "deploy_path": "/data1", "rri_item_id": 1}, 
         {"component": "grafana", "deploy_path": "/data1", "rri_item_id": 1}
     ],
-    "cluster_workload": {                       
+    "cluster_workload": {        
+        "type": "standard",               
         "docker_image": "lovecsust/brie-bench:latest",
         "rri_item_id": 1,                      
         "artifact_dir": "/artifacts",
