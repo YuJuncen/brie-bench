@@ -9,7 +9,7 @@ debug_show_cluster_info
 
 parse_args $@
 
-target=${target-"none"}
+target=${component-"none"}
 workload=${workload-""}
 hash=${hash-""}
 components=(br)
