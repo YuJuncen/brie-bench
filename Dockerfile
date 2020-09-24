@@ -14,7 +14,8 @@ RUN apk add --no-cache \
     git \
     bash \
     curl \
-    gcc
+    gcc \
+    g++ 
 
 RUN mkdir $ARTIFICATS
 CMD ["./run.sh"]

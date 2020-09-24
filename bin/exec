@@ -9,19 +9,15 @@ parse_args $@
 
 set -eu
 
-
 if [ ! $component ]; then
     show_help
     fail "must provide a component name"
 fi
 
-
 log component = $component
 log hash = ${hash-"default"}
 log workload = ${workload-"default"}
-
-# curl 172.16.5.110:8000/api/cluster/test -XPOST -d \
-echo '{
+basic_json=`echo '{
     "cluster_request": {
         "name": "br_version",            
         "version": "nightly"
@@ -38,10 +34,24 @@ echo '{
     "cluster_workload": {        
         "type": "standard",               
         "docker_image": "lovecsust/brie-bench:latest",
-        "args": ["br", "-h", "cde9f30e42fc3b938a4c3ab3bbc385b47ce7e2bc"],
+        "cmd": "./run.sh",
+        "args": [],
         "rri_item_id": 1,                      
         "artifact_dir": "/artifacts",
+        "env": {}
     }
-}'
+}' | jq ".cluster_workload.args+=[\"$component\"]"`
+
+if [ ${hash-""} ]; then
+    basic_json=`echo $basic_json | jq ".cluster_workload.args+=[\"-h\", \"$hash\"]"`
+fi
+if [ ${workload-""} ]; then
+    basic_json=`echo $basic_json | jq ".cluster_workload.args+=[\"-w\", \"$workload\"]"`
+fi
+
+log running with request
+log $basic_json
+
+curl 172.16.5.110:8000/api/cluster/test -XPOST -d "$basic_json"
 
 set +eu

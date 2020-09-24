@@ -9,17 +9,17 @@ debug_show_cluster_info
 
 parse_args $@
 
-target=${component-"none"}
+component=${component-"none"}
 workload=${workload-""}
 hash=${hash-""}
 components=(br)
 
-case $target in
+case $component in
     "br" )
         ./br/build $hash
         ./br/run $workload
         ;;
     * )
-        log "support components are ($components). Sorry for your choice $target is unsupported."
+        log "support components are ($components). Sorry for your choice $component is unsupported."
         ;;
 esac
