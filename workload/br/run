@@ -1,6 +1,6 @@
 #! /bin/bash
 
-source ../utils.sh
+source ./utils.sh
 
 workload=${1-tpcc1000}
 s3_args="access-key=YOURACCESSKEY&secret-access-key=YOURSECRETKEY&endpoint=http://172.16.4.4:30812"

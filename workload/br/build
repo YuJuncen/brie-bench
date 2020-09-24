@@ -2,7 +2,7 @@
 
 hash=$1
 git clone https://github.com/pingcap/br /br && cd /br
-source ../utils.sh
+source ./utils.sh
 
 if [ $hash ]; then
     log "setting hash to $hash"
