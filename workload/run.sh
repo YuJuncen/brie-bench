@@ -20,6 +20,6 @@ case $target in
         ./br/run $workload
         ;;
     * )
-        log "support components are ($components). Sorry for your choice `$target' is unsupported."
+        log "support components are ($components). Sorry for your choice $target is unsupported."
         ;;
 esac
