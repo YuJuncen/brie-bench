@@ -18,4 +18,5 @@ RUN apk add --no-cache \
     g++ 
 
 RUN mkdir $ARTIFICATS
-CMD ["./run.sh"]
+RUN go build -o bin/run
+CMD ["bin/run", "--help"]
