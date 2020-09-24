@@ -2,6 +2,10 @@ FROM golang:1.14-alpine
 ENV GO111MODULE=on
 ENV GOPROXY=https://goproxy.io,direct
 ENV ARTIFICATS=/artifacts
+ENV hash=""
+ENV workload=""
+ENV target=""
+
 WORKDIR /brie
 COPY ./workload .
 
@@ -9,7 +13,8 @@ RUN apk add --no-cache \
     make \
     git \
     bash \
-    curl 
+    curl \
+    gcc
 
 RUN mkdir $ARTIFICATS
 RUN ls /

@@ -1,8 +1,13 @@
 #! /bin/bash
 
 hash=$1
-git clone https://github.com/pingcap/br && cd br
+git clone https://github.com/pingcap/br /br && cd /br
 
 if [ $hash ]; then
+    log "setting hash to $hash"
     git reset --hard $hash
+else
+    log "no hash provided, using latest master..."
 fi
+
+make build
