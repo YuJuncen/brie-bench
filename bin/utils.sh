@@ -31,7 +31,7 @@ usage:
     exec component [-h/--hash (BR commit hash)] [-w workload]
 
     library needed:
-        workload/utils.sh
+        ./utils.sh
 eof
 }
 

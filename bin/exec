@@ -3,7 +3,7 @@
 set -eu
 
 if ! source bin/utils.sh; then
-    echo "failed to load the utils package. make sure workload/utils.sh exists"
+    echo "failed to load the utils package. make sure bin/utils.sh exists"
     exit 1
 fi
 
@@ -35,7 +35,7 @@ basic_json=`echo '{
     "cluster_workload": {        
         "type": "standard",               
         "docker_image": "lovecsust/brie-bench:latest",
-        "cmd": "./run.sh",
+        "cmd": "bin/run",
         "args": [],
         "rri_item_id": 1,                      
         "artifact_dir": "/artifacts",

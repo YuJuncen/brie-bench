@@ -69,8 +69,9 @@ func (B BR) Build(opts BuildOptions) (BuiltComponent, error) {
 		return nil, err
 	}
 	if opts.Hash != "" {
-		if err := utils.NewCommand("git",
-			"reset", "--hard", opts.Hash).Opt(utils.SystemOutput).Run(); err != nil {
+		if err := utils.NewCommand("git", "reset", "--hard", opts.Hash).
+			Opt(utils.SystemOutput, utils.WorkDir("/br")).
+			Run(); err != nil {
 			return nil, err
 		}
 	}

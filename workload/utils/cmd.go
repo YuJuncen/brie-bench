@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"github.com/pingcap/log"
 	"go.uber.org/zap"
-	"io"
 	"os"
 	"os/exec"
 )
@@ -45,8 +44,8 @@ var (
 		command.Stderr = nil
 	}
 	SystemOutput CommandOpt = func(command *exec.Cmd) {
-		command.Stdout = io.MultiWriter(command.Stdout, os.Stdout)
-		command.Stderr = io.MultiWriter(command.Stderr, os.Stderr)
+		command.Stdout = os.Stdout
+		command.Stderr = os.Stderr
 	}
 )
 
@@ -57,8 +56,13 @@ func (command *Command) Run() error {
 	cmd.Stderr = &stderr
 	command.beforeRun(cmd)
 	err := cmd.Run()
-	log.Debug(cmd.Path, zap.Strings("cmd", cmd.Args),
-		zap.String("stdout", stdout.String()), zap.String("stderr", stderr.String()))
+	log.Debug("exec done", zap.String("command", cmd.Path), zap.Strings("args", cmd.Args))
+	if cmd.Stderr == &stderr {
+		log.Debug("stderr", zap.Stringer("data", &stderr))
+	}
+	if cmd.Stdout == &stdout {
+		log.Debug("stderr", zap.Stringer("data", &stdout))
+	}
 	return err
 }
 
