@@ -8,6 +8,13 @@ debug_show_cluster_info() {
     echo "API_SERVER: "   "${API_SERVER-'UNKNOWN'}" >> $output
 }
 
+export BLUE_FONT=$'\e[36m'
+export RESET_FONT=$'\e[0m'
+
 log() {
-    echo -e "\e[36m[$(date "+%Y-%m-%d %H:%M:%S")]\e[0m" $@
+    if [ $logfile ]; then
+        echo "[$(date "+%Y-%m-%d %H:%M:%S")]" $@ >> $logfile
+    fi
+
+    echo -e "$BLUE_FONT[$(date "+%Y-%m-%d %H:%M:%S")]$RESET_FONT" $@
 }

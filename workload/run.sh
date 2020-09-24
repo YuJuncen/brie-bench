@@ -18,6 +18,6 @@ case $target in
         ./br/run $workload
         ;;
     * )
-        echo "please set the target env to one of ($components)."
+        log "please set the target env to one of ($components). Your choice is $target."
         ;;
 esac
