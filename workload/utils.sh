@@ -12,7 +12,7 @@ export BLUE_FONT=$'\e[36m'
 export RESET_FONT=$'\e[0m'
 
 log() {
-    if [ $logfile ]; then
+    if [ ${logfile-""} ]; then
         echo "[$(date "+%Y-%m-%d %H:%M:%S")]" $@ >> $logfile
     fi
 

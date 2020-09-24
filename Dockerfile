@@ -4,7 +4,7 @@ ENV GOPROXY=https://goproxy.io,direct
 ENV ARTIFICATS=/artifacts
 ENV hash=""
 ENV workload=""
-ENV target=""
+ENV target="none"
 
 WORKDIR /brie
 COPY ./workload .
