@@ -1,5 +1,5 @@
 #!/bin/bash
 
-set -euv
+set -eu
 
 curl -s 172.16.5.110:8000/api/cluster/$1 | jq

@@ -1,25 +1,33 @@
 package main
 
 import (
-	"flag"
-	components "github.com/yujuncen/brie-bench/workload/components"
-
 	"github.com/pingcap/log"
+	flag "github.com/spf13/pflag"
+	components "github.com/yujuncen/brie-bench/workload/components"
 	"github.com/yujuncen/brie-bench/workload/utils"
+	"github.com/yujuncen/brie-bench/workload/utils/pd"
 	"go.uber.org/zap"
 )
 
 const Artifacts = "/artifacts"
 
 var (
-	component = flag.String("component", "", "specify the component to test")
-	hash      = flag.String("hash", "", "specify the component commit hash")
-	workload  = flag.String("workload", "tpcc1000", "specify the workload")
+	component      = flag.String("component", "", "specify the component to test")
+	hash           = flag.String("hash", "", "specify the component commit hash")
+	workload       = flag.String("workload", "tpcc1000", "specify the workload")
+	debugComponent = flag.Bool("debug-component", false, "component will generate debug level log if enabled")
+	disturbance    = flag.Bool("disturbance", false, "enable shuffle-{leader,region,hot-region}-scheduler to simulate extreme environment")
 )
 
 func main() {
 	flag.Parse()
 	cluster := utils.NewCluster()
+	if err := utils.DumpCluster(cluster); err != nil {
+		log.Warn("failed to dump cluster info", zap.Error(err))
+	}
+	if err := utils.DumpEnv(); err != nil {
+		log.Warn("failed to dump env ", zap.Error(err))
+	}
 	switch *component {
 	case "br":
 		br := components.NewBR()
@@ -31,9 +39,13 @@ func main() {
 		ibr, err := br.Build(buildOptions)
 		utils.Must(err)
 		opts := components.BROption{
-			Workload: components.ParseWorkload(*workload),
-			LogDir:   Artifacts,
-			Cluster:  cluster,
+			Workload:    components.ParseWorkload(*workload),
+			LogDir:      Artifacts,
+			Cluster:     cluster,
+			UseDebugLog: *debugComponent,
+		}
+		if *disturbance {
+			utils.Must(pd.DefaultClient.EnableScheduler([]string{cluster.PdAddr}, pd.Schedulers...))
 		}
 		log.Info("Run with options", zap.Any("options", opts))
 		utils.Must(ibr.Run(opts))

@@ -24,22 +24,24 @@ type BRWorkload struct {
 }
 
 type BROption struct {
-	Cluster  *utils.Cluster
-	LogDir   string
-	Workload BRWorkload
+	Cluster     *utils.Cluster
+	LogDir      string
+	Workload    BRWorkload
+	UseDebugLog bool
 }
 
-func (br BRRunner) Run(opts interface{}) error {
-	opt, ok := opts.(BROption)
-	if !ok {
-		return errors.New("bad BR option")
-	}
+func (br BRRunner) Restore(opt BROption) error {
 	restoreStart := time.Now()
-	restore := utils.NewCommand(br.binary, "restore", "full",
+	restoreCliOpts := []string{
+		"restore", "full",
 		"--log-file", path.Join(opt.LogDir, "restore.log"),
-		"--log-level", "DEBUG",
 		"--pd", opt.Cluster.PdAddr,
-		"-s", opt.Workload.restoreStorage)
+		"-s", opt.Workload.restoreStorage,
+	}
+	if opt.UseDebugLog {
+		restoreCliOpts = append(restoreCliOpts, []string{"--log-level", "DEBUG"}...)
+	}
+	restore := utils.NewCommand(br.binary, restoreCliOpts...)
 	restore.Opt(utils.DropOutput)
 	if err := restore.Run(); err != nil {
 		return err
@@ -47,12 +49,21 @@ func (br BRRunner) Run(opts interface{}) error {
 	log.Info("restore done",
 		zap.String("workload", opt.Workload.name),
 		zap.Stringer("cost", time.Since(restoreStart)))
+	return nil
+}
+
+func (br BRRunner) Backup(opt BROption) error {
 	backupStart := time.Now()
-	backup := utils.NewCommand(br.binary, "backup", "full",
+	backupCliOpts := []string{
+		"backup", "full",
 		"--log-file", path.Join(opt.LogDir, "backup.log"),
-		"--log-level", "DEBUG",
 		"--pd", opt.Cluster.PdAddr,
-		"-s", opt.Workload.backupStorage)
+		"-s", opt.Workload.backupStorage,
+	}
+	if opt.UseDebugLog {
+		backupCliOpts = append(backupCliOpts, []string{"--log-level", "DEBUG"}...)
+	}
+	backup := utils.NewCommand(br.binary)
 	backup.Opt(utils.DropOutput)
 	if err := backup.Run(); err != nil {
 		return err
@@ -60,6 +71,20 @@ func (br BRRunner) Run(opts interface{}) error {
 	log.Info("backup done",
 		zap.String("workload", opt.Workload.name),
 		zap.Stringer("cost", time.Since(backupStart)))
+	return nil
+}
+
+func (br BRRunner) Run(opts interface{}) error {
+	opt, ok := opts.(BROption)
+	if !ok {
+		return errors.New("bad BR option")
+	}
+	if err := br.Restore(opt); err != nil {
+		return err
+	}
+	if err := br.Backup(opt); err != nil {
+		return err
+	}
 	return nil
 }
 
