@@ -20,7 +20,7 @@ log hash = ${hash-"default"}
 log workload = ${workload-"default"}
 basic_json=`echo '{
     "cluster_request": {
-        "name": "br_version",            
+        "name": "brie-test",
         "version": "nightly"
     },
     "cluster_request_topologies": [
@@ -43,12 +43,7 @@ basic_json=`echo '{
     }
 }' | jq ".cluster_workload.args+=[\"-component\", \"$component\"]"`
 
-if [ ${hash-""} ]; then
-    basic_json=`echo $basic_json | jq ".cluster_workload.args+=[\"-hash\", \"$hash\"]"`
-fi
-if [ ${workload-""} ]; then
-    basic_json=`echo $basic_json | jq ".cluster_workload.args+=[\"-workload\", \"$workload\"]"`
-fi
+basic_json=`echo $basic_json | jq ".cluster_workload.args+=$other_args | .cluster_request.name=\"$component-bench\""`
 
 log running with request
 log $basic_json

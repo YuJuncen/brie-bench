@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/pingcap/log"
 	"github.com/yujuncen/brie-bench/workload/utils"
+	"github.com/yujuncen/brie-bench/workload/utils/git"
 	"go.uber.org/zap"
 	"path"
 	"time"
@@ -89,20 +90,16 @@ func (br BRRunner) Run(opts interface{}) error {
 }
 
 func (B BR) Build(opts BuildOptions) (BuiltComponent, error) {
-	if err := utils.NewCommand("git",
-		"clone", opts.Repository, "/br").Opt(utils.SystemOutput).Run(); err != nil {
+	repo, err := git.Clone(opts.Repository, "/br")
+	if err != nil {
 		return nil, err
 	}
 	if opts.Hash != "" {
-		if err := utils.NewCommand("git", "reset", "--hard", opts.Hash).
-			Opt(utils.SystemOutput, utils.WorkDir("/br")).
-			Run(); err != nil {
+		if err := repo.ResetHard(opts.Hash); err != nil {
 			return nil, err
 		}
 	}
-	if err := utils.NewCommand("make", "build").
-		Opt(utils.WorkDir("/br"), utils.SystemOutput).
-		Run(); err != nil {
+	if err := repo.Make("build"); err != nil {
 		return nil, err
 	}
 	return BRRunner{"/br/bin/br"}, nil

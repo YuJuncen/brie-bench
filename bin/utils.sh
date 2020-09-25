@@ -28,25 +28,16 @@ eof
 parse_args() {
     export component=${1-""}
     shift
+    export other_args="[]"
     while [[ $# -gt 0 ]]; do
     case $1 in
-    -h | --hash )
-        export hash=$2
-        shift
-        shift
-        ;;
-    -w )
-        export workload=$2
-        shift
-        shift
-        ;;
     --dry-run )
         export dry_run=1
         shift
         ;;
     *)
-        show_help
-        fail "unknown flag $1"
+        other_args=`echo $other_args | jq ". += [\"$1\"]"`
+        shift
         ;;
     esac
     done
