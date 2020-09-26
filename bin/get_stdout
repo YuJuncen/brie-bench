@@ -1,6 +1,0 @@
-#! /bin/bash
-
-set -eu
-
-key=$(mc ls --json minio/artifacts/$1 | jq -r ".key")
-mc cat minio/artifacts/$1/${key}stdout.log

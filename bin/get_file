@@ -1,0 +1,13 @@
+#! /bin/bash
+
+set -eu
+
+key=$(mc ls --json minio/artifacts/$1 | jq -r ".key")
+if [ ${2-""} ]; then
+  mc cat minio/artifacts/$1/${key}${2}
+else
+  select file in $(mc ls --json minio/artifacts/$1/${key} | jq -r ".key"); do
+    mc cat minio/artifacts/$1/${key}${file} | less
+    break
+  done
+fi

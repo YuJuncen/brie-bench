@@ -41,7 +41,7 @@ basic_json=`echo '{
         "artifact_dir": "/artifacts",
         "env": {}
     }
-}' | jq ".cluster_workload.args+=[\"-component\", \"$component\"]"`
+}' | jq ".cluster_workload.args+=[\"--component\", \"$component\"]"`
 
 basic_json=`echo $basic_json | jq ".cluster_workload.args+=$other_args | .cluster_request.name=\"$component-bench\""`
 

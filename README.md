@@ -7,7 +7,7 @@ This repository contains the workload and some utils to run those cases.
 ## usage
 
 ```bash
-exec component [--dry-run] [args passing to main.go...]
+bin/exec component [--dry-run] [args passing to main.go...]
 ```
 
 This command will make request to the default API server(172.16.5.110:8000), 

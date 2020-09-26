@@ -64,7 +64,7 @@ func (br BRRunner) Backup(opt BROption) error {
 	if opt.UseDebugLog {
 		backupCliOpts = append(backupCliOpts, []string{"--log-level", "DEBUG"}...)
 	}
-	backup := utils.NewCommand(br.binary)
+	backup := utils.NewCommand(br.binary, backupCliOpts...)
 	backup.Opt(utils.DropOutput)
 	if err := backup.Run(); err != nil {
 		return err
