@@ -90,14 +90,9 @@ func (br BRRunner) Run(opts interface{}) error {
 }
 
 func (B BR) Build(opts BuildOptions) (BuiltComponent, error) {
-	repo, err := git.Clone(opts.Repository, "/br")
+	repo, err := git.CloneHash(opts.Repository, "/br", opts.Hash)
 	if err != nil {
 		return nil, err
-	}
-	if opts.Hash != "" {
-		if err := repo.ResetHard(opts.Hash); err != nil {
-			return nil, err
-		}
 	}
 	if err := repo.Make("build"); err != nil {
 		return nil, err

@@ -38,6 +38,15 @@ func WorkDir(dir string) CommandOpt {
 	}
 }
 
+func RedirectTo(dir string) CommandOpt {
+	return func(command *exec.Cmd) {
+		file, err := os.Create(dir)
+		Must(err)
+		command.Stdout = file
+		command.Stderr = file
+	}
+}
+
 var (
 	DropOutput CommandOpt = func(command *exec.Cmd) {
 		command.Stdout = nil

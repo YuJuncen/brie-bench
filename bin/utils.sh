@@ -49,7 +49,7 @@ add_cluster() {
 
 get_cluster() {
   clusters=$(cat .brie_bench_last_cluster || echo "")
-  if [ ! $clusters ]; then
+  if [ ! "$clusters" ]; then
     fail "no request found"
   fi
   select cluster in $clusters; do

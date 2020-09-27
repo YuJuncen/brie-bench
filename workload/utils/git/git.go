@@ -32,6 +32,20 @@ type Repo struct {
 	local  string
 }
 
+func CloneHash(remote, to, hash string) (*Repo, error) {
+	repo, err := Clone(remote, to)
+	if err != nil {
+		return nil, err
+	}
+	if hash != "" {
+		err2 := repo.ResetHard(hash)
+		if err2 != nil {
+			return nil, err2
+		}
+	}
+	return repo, nil
+}
+
 func Clone(remote, to string) (*Repo, error) {
 	if to == "" {
 		var err error

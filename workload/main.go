@@ -18,6 +18,8 @@ var (
 	workload       = flag.String("workload", "tpcc1000", "specify the workload")
 	debugComponent = flag.Bool("debug-component", false, "component will generate debug level log if enabled")
 	disturbance    = flag.Bool("disturbance", false, "enable shuffle-{leader,region,hot-region}-scheduler to simulate extreme environment")
+
+	dumplingType = flag.String("dumpling.type", "sql", "the result type of dumpling")
 )
 
 func main() {
@@ -53,6 +55,25 @@ func main() {
 		}
 		log.Info("Run with options", zap.Any("options", opts))
 		utils.Must(ibr.Run(opts))
+	case "dumpling":
+		dumpling := components.NewDumpling()
+		buildOptions := components.BuildOptions{
+			Repository: *repo,
+			Hash:       *hash,
+		}
+		if buildOptions.Repository == "" {
+			buildOptions.Repository = "https://github.com/pingcap/dumpling"
+		}
+		dumpbin, err := dumpling.Build(buildOptions)
+		utils.Must(err)
+		opts := components.DumplingOpts{
+			TargetDir: "/tmp/dumped",
+			SplitRows: 0,
+			FileType:  *dumplingType,
+			LogPath:   Artifacts,
+		}
+		utils.Must(dumpbin.Run(opts))
+
 	default:
 		log.Panic("Your component isn't supported.\n", zap.String("component", *component))
 	}
