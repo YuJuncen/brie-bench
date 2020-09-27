@@ -64,6 +64,8 @@ func (command *Command) Run() error {
 	stdout := new(bytes.Buffer)
 	stderr := new(bytes.Buffer)
 	cmd := exec.Command(command.path, command.args...)
+	cmd.Stdout = NopIO
+	cmd.Stderr = NopIO
 	command.beforeRun(cmd)
 	cmd.Stdout = io.MultiWriter(cmd.Stdout, stdout)
 	cmd.Stderr = io.MultiWriter(cmd.Stderr, stderr)

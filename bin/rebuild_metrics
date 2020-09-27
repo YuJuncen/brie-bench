@@ -4,9 +4,12 @@ set -euv
 
 API_SERVER=172.16.5.110:8000
 
-cluster_request_id=$1
-select id in $(curl -s $API_SERVER/api/cluster/workload/${cluster_request_id}/artifacts | jq -r ".[].uuid"); do
-  echo "rebuilding metrics of $cluster_request_id[$id]..."
-  curl -v -XPOST $API_SERVER/api/cluster/workload/${cluster_request_id}/artifacts/monitor/${id}
+cluster_id=${1-$(get_cluster)}
+if [ $cluster_id = '.' ]; then
+  cluster_id=`get_last_cluster`
+fi
+select id in $(curl -s $API_SERVER/api/cluster/workload/${cluster_id}/artifacts | jq -r ".[].uuid"); do
+  echo "rebuilding metrics of $cluster_id(with artifact: $id)..."
+  curl -v -XPOST $API_SERVER/api/cluster/workload/${cluster_id}/artifacts/monitor/${id}
   break
 done

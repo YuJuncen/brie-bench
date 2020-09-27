@@ -12,7 +12,8 @@ import (
 )
 
 const S3Args = `access-key=YOURACCESSKEY&secret-access-key=YOURSECRETKEY&endpoint=http://172.16.4.4:30812`
-const TempBackupStorage = `local:///tmp/backup`
+
+var TempBackupStorage = fmt.Sprintf(`s3://brie/backup?%s`, S3Args)
 
 type BR struct{}
 type BRRunner struct {

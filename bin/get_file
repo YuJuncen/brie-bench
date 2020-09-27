@@ -12,6 +12,13 @@ if [ $cluster_id = '.' ]; then
 fi
 
 key=$(mc ls --json minio/artifacts/$cluster_id | jq -r ".key")
+if [ $(echo "$key" | wc -l) -gt 1 ]; then
+  select k in $key; do
+    key=k
+    break
+  done
+fi
+
 if [ ${2-""} ]; then
   mc cat minio/artifacts/$1/${key}${2}
 else

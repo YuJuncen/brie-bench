@@ -6,7 +6,9 @@ import (
 	"github.com/yujuncen/brie-bench/workload/utils"
 	"github.com/yujuncen/brie-bench/workload/utils/git"
 	"go.uber.org/zap"
+	"os"
 	"path"
+	"path/filepath"
 	"strconv"
 	"time"
 )
@@ -50,6 +52,15 @@ func (d *DumplingBin) Run(opts interface{}) error {
 	if err := utils.NewCommand(d.binary, binOpts...).
 		Opt(utils.RedirectTo(path.Join(opt.LogPath, "dumpling.log"))).
 		Run(); err != nil {
+		return err
+	}
+	if err := filepath.Walk(opt.TargetDir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		log.Info("file dumped", zap.String("name", info.Name()), zap.Stringer("size", utils.Size(info.Size())))
+		return nil
+	}); err != nil {
 		return err
 	}
 	log.Info("dumpling done", zap.Duration("cost", time.Since(begin)))
