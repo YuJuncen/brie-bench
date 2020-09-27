@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/pingcap/log"
-	flag "github.com/spf13/pflag"
 	components "github.com/yujuncen/brie-bench/workload/components"
+	"github.com/yujuncen/brie-bench/workload/config"
 	"github.com/yujuncen/brie-bench/workload/utils"
 	"github.com/yujuncen/brie-bench/workload/utils/pd"
 	"go.uber.org/zap"
@@ -11,19 +11,10 @@ import (
 
 const Artifacts = "/artifacts"
 
-var (
-	component      = flag.String("component", "", "specify the component to test")
-	hash           = flag.String("hash", "", "specify the component commit hash")
-	repo           = flag.String("repo", "", "specify the repository the bench uses")
-	workload       = flag.String("workload", "tpcc1000", "specify the workload")
-	debugComponent = flag.Bool("debug-component", false, "component will generate debug level log if enabled")
-	disturbance    = flag.Bool("disturbance", false, "enable shuffle-{leader,region,hot-region}-scheduler to simulate extreme environment")
-
-	dumplingType = flag.String("dumpling.type", "sql", "the result type of dumpling")
-)
-
 func main() {
-	flag.Parse()
+	config.Init()
+	log.Info("run with", zap.Any("config", config.C))
+
 	cluster := utils.NewCluster()
 	if err := utils.DumpCluster(cluster); err != nil {
 		log.Warn("failed to dump cluster info", zap.Error(err))
@@ -31,12 +22,12 @@ func main() {
 	if err := utils.DumpEnv(); err != nil {
 		log.Warn("failed to dump env ", zap.Error(err))
 	}
-	switch *component {
+	switch config.C.Component {
 	case "br":
 		br := components.NewBR()
 		buildOptions := components.BuildOptions{
-			Repository: *repo,
-			Hash:       *hash,
+			Repository: config.C.Repo,
+			Hash:       config.C.Hash,
 		}
 		if buildOptions.Repository == "" {
 			buildOptions.Repository = "https://github.com/pingcap/br"
@@ -45,12 +36,12 @@ func main() {
 		ibr, err := br.Build(buildOptions)
 		utils.Must(err)
 		opts := components.BROption{
-			Workload:    components.ParseWorkload(*workload),
+			Workload:    components.ParseWorkload(config.C.Workload),
 			LogDir:      Artifacts,
 			Cluster:     cluster,
-			UseDebugLog: *debugComponent,
+			UseDebugLog: config.C.DebugComponent,
 		}
-		if *disturbance {
+		if config.C.Disturbance {
 			utils.Must(pd.DefaultClient.EnableScheduler([]string{cluster.PdAddr}, pd.Schedulers...))
 		}
 		log.Info("Run with options", zap.Any("options", opts))
@@ -58,8 +49,8 @@ func main() {
 	case "dumpling":
 		dumpling := components.NewDumpling()
 		buildOptions := components.BuildOptions{
-			Repository: *repo,
-			Hash:       *hash,
+			Repository: config.C.Repo,
+			Hash:       config.C.Hash,
 		}
 		if buildOptions.Repository == "" {
 			buildOptions.Repository = "https://github.com/pingcap/dumpling"
@@ -69,12 +60,12 @@ func main() {
 		opts := components.DumplingOpts{
 			TargetDir: "/tmp/dumped",
 			SplitRows: 0,
-			FileType:  *dumplingType,
+			FileType:  config.C.Dumpling.FileType,
 			LogPath:   Artifacts,
 		}
 		utils.Must(dumpbin.Run(opts))
 
 	default:
-		log.Panic("Your component isn't supported.\n", zap.String("component", *component))
+		log.Panic("Your component isn't supported.\n", zap.String("component", config.C.Component))
 	}
 }

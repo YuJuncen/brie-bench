@@ -27,8 +27,6 @@ basic_json=`echo '{
         {"component": "tidb", "deploy_path": "/data1", "rri_item_id": 1}, 
         {"component": "pd", "deploy_path": "/data1", "rri_item_id": 1}, 
         {"component": "tikv", "deploy_path": "/data1", "rri_item_id": 2},
-        {"component": "tikv", "deploy_path": "/data1", "rri_item_id": 3},
-        {"component": "tikv", "deploy_path": "/data1", "rri_item_id": 4},
         {"component": "prometheus", "deploy_path": "/data1", "rri_item_id": 1},
         {"component": "grafana", "deploy_path": "/data1", "rri_item_id": 1}
     ],

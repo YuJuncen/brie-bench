@@ -57,3 +57,7 @@ get_cluster() {
     break
   done
 }
+
+get_last_cluster() {
+  cat .brie_bench_last_cluster | tail -n 1
+}

@@ -3,7 +3,9 @@ package utils
 import (
 	"bytes"
 	"github.com/pingcap/log"
+	"github.com/yujuncen/brie-bench/workload/config"
 	"go.uber.org/zap"
+	"io"
 	"os"
 	"os/exec"
 )
@@ -59,19 +61,21 @@ var (
 )
 
 func (command *Command) Run() error {
-	var stdout, stderr bytes.Buffer
+	stdout := new(bytes.Buffer)
+	stderr := new(bytes.Buffer)
 	cmd := exec.Command(command.path, command.args...)
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
 	command.beforeRun(cmd)
+	cmd.Stdout = io.MultiWriter(cmd.Stdout, stdout)
+	cmd.Stderr = io.MultiWriter(cmd.Stderr, stderr)
 	log.Info("executing", zap.Stringer("command", cmd))
 	err := cmd.Run()
-	log.Debug("exec done", zap.String("command", cmd.Path), zap.Strings("args", cmd.Args))
-	if cmd.Stderr == &stderr {
-		log.Debug("stderr", zap.Stringer("data", &stderr))
-	}
-	if cmd.Stdout == &stdout {
-		log.Debug("stderr", zap.Stringer("data", &stdout))
+	if err != nil {
+		log.Warn("execute failed", zap.Stringer("command", cmd), zap.Error(err))
+		env := new(bytes.Buffer)
+		_ = DumpEnvTo(env)
+		log.Info("config", zap.Any("config", config.C), zap.Stringer("env", env))
+		log.Info("stderr", zap.Stringer("data", stderr))
+		log.Info("stdout", zap.Stringer("data", stdout))
 	}
 	return err
 }

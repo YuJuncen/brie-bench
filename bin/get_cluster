@@ -8,5 +8,8 @@ if ! source bin/utils.sh; then
     exit 1
 fi
 cluster_id=${1-$(get_cluster)}
+if [ $cluster_id = '.' ]; then
+  cluster_id=`get_last_cluster`
+fi
 
 curl -s 172.16.5.110:8000/api/cluster/$cluster_id | jq

@@ -5,28 +5,6 @@ import (
 	"os"
 )
 
-/*
-func (B BR) Build(opts BuildOptions) (BuiltComponent, error) {
-	if err := utils.NewCommand("git",
-		"clone", opts.Repository, "/br").Opt(utils.SystemOutput).Run(); err != nil {
-		return nil, err
-	}
-	if opts.Hash != "" {
-		if err := utils.NewCommand("git", "reset", "--hard", opts.Hash).
-			Opt(utils.SystemOutput, utils.WorkDir("/br")).
-			Run(); err != nil {
-			return nil, err
-		}
-	}
-	if err := utils.NewCommand("make", "build").
-		Opt(utils.WorkDir("/br"), utils.SystemOutput).
-		Run(); err != nil {
-		return nil, err
-	}
-	return BRRunner{"/br/bin/br"}, nil
-}
-*/
-
 type Repo struct {
 	remote string
 	local  string

@@ -48,6 +48,7 @@ func (c ClientExt) EnableScheduler(pdAddrs []string, schedulers ...string) error
 			}
 			if !isOk(result.StatusCode) {
 				failBody, _ := ioutil.ReadAll(result.Body)
+				_ = result.Body.Close()
 				log.Error("failed to add scheduler",
 					zap.String("status", result.Status),
 					zap.String("response", string(failBody)),
