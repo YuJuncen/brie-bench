@@ -51,8 +51,8 @@ func RedirectTo(dir string) CommandOpt {
 
 var (
 	DropOutput CommandOpt = func(command *exec.Cmd) {
-		command.Stdout = nil
-		command.Stderr = nil
+		command.Stdout = NopIO
+		command.Stderr = NopIO
 	}
 	SystemOutput CommandOpt = func(command *exec.Cmd) {
 		command.Stdout = os.Stdout
