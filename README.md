@@ -18,10 +18,13 @@ by other utils then.
 
 ### binaries (WIP)
 
-- `get_file cluster_id [filename]`: Get the output file of the test from the `minio` s3 endpoint. 
+- `get_file [cluster_id] [filename]`: Get the output file of the test from the `minio` s3 endpoint. 
 (Need run `mc alias set minio http://172.16.4.18:30812 YOURACCESSKEY YOURSECRETKEY` firstly for the default API server).
-- `get_cluster cluster_id`: Get the cluster info.
-- `rebuild_metrics`: Rebuild the grafana metrics. (WIP)
+- `get_cluster [cluster_id]`: Get the cluster info.
+- `rebuild_metrics [cluster_id]`: Rebuild the grafana metrics. (WIP)
+
+The cluster ID can be a dot(`.`), which means get the last requested cluster.  
+The cluster ID can be absent, and then you can select one from recent requests.
 
 ### Parameters
 
