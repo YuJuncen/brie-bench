@@ -55,6 +55,7 @@ func (command *Command) Run() error {
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
 	command.beforeRun(cmd)
+	log.Info("executing", zap.Stringer("command", cmd))
 	err := cmd.Run()
 	log.Debug("exec done", zap.String("command", cmd.Path), zap.Strings("args", cmd.Args))
 	if cmd.Stderr == &stderr {
@@ -68,6 +69,6 @@ func (command *Command) Run() error {
 
 func Must(e error) {
 	if e != nil {
-		log.Panic("meet error %v", zap.Error(e))
+		log.Panic("meet error", zap.Error(e))
 	}
 }

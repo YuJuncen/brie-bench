@@ -2,12 +2,23 @@
 
 set -eu
 
-key=$(mc ls --json minio/artifacts/$1 | jq -r ".key")
+if ! source bin/utils.sh; then
+    echo "failed to load the utils package. make sure bin/utils.sh exists"
+    exit 1
+fi
+cluster_id=${1-$(get_cluster)}
+
+key=$(mc ls --json minio/artifacts/$cluster_id | jq -r ".key")
 if [ ${2-""} ]; then
   mc cat minio/artifacts/$1/${key}${2}
 else
-  select file in $(mc ls --json minio/artifacts/$1/${key} | jq -r ".key"); do
-    mc cat minio/artifacts/$1/${key}${file} | less
+  files=$(mc ls --json minio/artifacts/$cluster_id/${key} | jq -r ".key")
+  if [ ! "$files" ]; then
+    fail "no file found in cluster $cluster_id"
+  fi
+  log "select file (^D aka EOF to exit): "
+  select file in $files; do
+    mc cat minio/artifacts/$cluster_id/${key}${file} | less
     break
   done
 fi

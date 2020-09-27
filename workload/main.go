@@ -14,6 +14,7 @@ const Artifacts = "/artifacts"
 var (
 	component      = flag.String("component", "", "specify the component to test")
 	hash           = flag.String("hash", "", "specify the component commit hash")
+	repo           = flag.String("repo", "", "specify the repository the bench uses")
 	workload       = flag.String("workload", "tpcc1000", "specify the workload")
 	debugComponent = flag.Bool("debug-component", false, "component will generate debug level log if enabled")
 	disturbance    = flag.Bool("disturbance", false, "enable shuffle-{leader,region,hot-region}-scheduler to simulate extreme environment")
@@ -32,8 +33,11 @@ func main() {
 	case "br":
 		br := components.NewBR()
 		buildOptions := components.BuildOptions{
-			Repository: "https://github.com/pingcap/br",
+			Repository: *repo,
 			Hash:       *hash,
+		}
+		if buildOptions.Repository == "" {
+			buildOptions.Repository = "https://github.com/pingcap/br"
 		}
 		log.Info("build with options", zap.Any("options", buildOptions))
 		ibr, err := br.Build(buildOptions)

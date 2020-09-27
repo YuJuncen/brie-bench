@@ -2,4 +2,11 @@
 
 set -eu
 
-curl -s 172.16.5.110:8000/api/cluster/$1 | jq
+
+if ! source bin/utils.sh; then
+    echo "failed to load the utils package. make sure bin/utils.sh exists"
+    exit 1
+fi
+cluster_id=${1-$(get_cluster)}
+
+curl -s 172.16.5.110:8000/api/cluster/$cluster_id | jq

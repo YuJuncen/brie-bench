@@ -26,10 +26,10 @@ basic_json=`echo '{
     "cluster_request_topologies": [
         {"component": "tidb", "deploy_path": "/data1", "rri_item_id": 1}, 
         {"component": "pd", "deploy_path": "/data1", "rri_item_id": 1}, 
-        {"component": "tikv", "deploy_path": "/data1", "rri_item_id": 2}, 
-        {"component": "tikv", "deploy_path": "/data1", "rri_item_id": 3}, 
-        {"component": "tikv", "deploy_path": "/data1", "rri_item_id": 4}, 
-        {"component": "prometheus", "deploy_path": "/data1", "rri_item_id": 1}, 
+        {"component": "tikv", "deploy_path": "/data1", "rri_item_id": 2},
+        {"component": "tikv", "deploy_path": "/data1", "rri_item_id": 3},
+        {"component": "tikv", "deploy_path": "/data1", "rri_item_id": 4},
+        {"component": "prometheus", "deploy_path": "/data1", "rri_item_id": 1},
         {"component": "grafana", "deploy_path": "/data1", "rri_item_id": 1}
     ],
     "cluster_workload": {        
@@ -49,6 +49,7 @@ log running with request
 log $basic_json
 
 if [ ! ${dry_run-""} ]; then
-  curl 172.16.5.110:8000/api/cluster/test -XPOST -d "$basic_json"
+  cluster_id=$(curl 172.16.5.110:8000/api/cluster/test -XPOST -d "$basic_json" | jq ".cluster_request_id")
+  add_cluster $cluster_id
 fi
 set +eu

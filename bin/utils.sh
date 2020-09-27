@@ -42,3 +42,18 @@ parse_args() {
     esac
     done
 }
+
+add_cluster() {
+  echo $1 >> .brie_bench_last_cluster
+}
+
+get_cluster() {
+  clusters=$(cat .brie_bench_last_cluster || echo "")
+  if [ ! $clusters ]; then
+    fail "no request found"
+  fi
+  select cluster in $clusters; do
+    echo $cluster
+    break
+  done
+}
