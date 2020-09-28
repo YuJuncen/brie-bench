@@ -9,7 +9,7 @@ if [ $cluster_id = '.' ]; then
   cluster_id=`get_last_cluster`
 fi
 select id in $(curl -s $API_SERVER/api/cluster/workload/${cluster_id}/artifacts | jq -r ".[].uuid"); do
-  echo "rebuilding metrics of $cluster_id(with artifact: $id)..."
+  log "rebuilding metrics of $cluster_id(with artifact: $id)..."
   curl -v -XPOST $API_SERVER/api/cluster/workload/${cluster_id}/artifacts/monitor/${id}
   break
 done

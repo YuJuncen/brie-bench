@@ -35,6 +35,8 @@ func (br BRBin) MakeOptionsWith(conf config.Config, cluster *utils.Cluster) inte
 		LogDir:      config.Artifacts,
 		Cluster:     cluster,
 		UseDebugLog: conf.DebugComponent,
+		SkipBackup:  conf.BR.SkipBackup,
+		Extra:       conf.ComponentArgs,
 	}
 }
 
@@ -52,6 +54,8 @@ type BROption struct {
 	Workload    BRWorkload
 	UseDebugLog bool
 	SkipBackup  bool
+
+	Extra []string
 }
 
 func (br BRBin) Restore(opt BROption) error {
@@ -65,6 +69,7 @@ func (br BRBin) Restore(opt BROption) error {
 	if opt.UseDebugLog {
 		restoreCliOpts = append(restoreCliOpts, []string{"--log-level", "DEBUG"}...)
 	}
+	restoreCliOpts = append(restoreCliOpts, opt.Extra...)
 	restore := utils.NewCommand(br.binary, restoreCliOpts...)
 	restore.Opt(utils.DropOutput)
 	if err := restore.Run(); err != nil {
@@ -87,6 +92,7 @@ func (br BRBin) Backup(opt BROption) error {
 	if opt.UseDebugLog {
 		backupCliOpts = append(backupCliOpts, []string{"--log-level", "DEBUG"}...)
 	}
+	backupCliOpts = append(backupCliOpts, opt.Extra...)
 	backup := utils.NewCommand(br.binary, backupCliOpts...)
 	backup.Opt(utils.DropOutput)
 	if err := backup.Run(); err != nil {
@@ -112,7 +118,7 @@ func (br BRBin) Run(opts interface{}) error {
 	return nil
 }
 
-func (B BR) Build(opts BuildOptions) (ComponentBinary, error) {
+func (B BR) Build(opts BuildOptions) (Binary, error) {
 	repo, err := git.CloneHash(opts.Repository, "/br", opts.Hash)
 	if err != nil {
 		return nil, err

@@ -28,7 +28,7 @@ func NewDumpling() Component {
 	return Dumpling{}
 }
 
-func (d Dumpling) Build(opts BuildOptions) (ComponentBinary, error) {
+func (d Dumpling) Build(opts BuildOptions) (Binary, error) {
 	repo, err := git.CloneHash(opts.Repository, "/dumpling", opts.Hash)
 	if err != nil {
 		return nil, err
@@ -49,17 +49,17 @@ func (d *DumplingBin) MakeOptionsWith(conf config.Config, cluster *utils.Cluster
 	return DumplingOpts{
 		TargetDir: "/tmp/dumped",
 		SplitRows: 0,
-		FileType:  conf.Dumpling.FileType,
 		LogPath:   config.Artifacts,
 		Cluster:   cluster,
+
+		SkipSQL: conf.Dumpling.SkipSQL,
+		SkipCSV: conf.Dumpling.SkipCSV,
+
+		Extra: conf.ComponentArgs,
 	}
 }
 
-func (d *DumplingBin) Run(opts interface{}) error {
-	opt, ok := opts.(DumplingOpts)
-	if !ok {
-		return errors.New("dumpling running with incompatible opt")
-	}
+func (d *DumplingBin) Dump(opt DumplingOpts, fileType string) error {
 	begin := time.Now()
 	host, port, err := utils.HostAndPort(opt.Cluster.TidbAddr)
 	if err != nil {
@@ -67,13 +67,14 @@ func (d *DumplingBin) Run(opts interface{}) error {
 	}
 	binOpts := []string{
 		"--output", opt.TargetDir,
-		"--filetype", opt.FileType,
+		"--filetype", fileType,
 		"--host", host,
 		"--port", port,
 	}
 	if opt.SplitRows > 0 {
 		binOpts = append(binOpts, []string{"--rows", strconv.Itoa(opt.SplitRows)}...)
 	}
+	binOpts = append(binOpts, opt.Extra...)
 	if err := utils.NewCommand(d.binary, binOpts...).
 		Opt(utils.RedirectTo(path.Join(opt.LogPath, "dumpling.log"))).
 		Run(); err != nil {
@@ -92,13 +93,34 @@ func (d *DumplingBin) Run(opts interface{}) error {
 	return nil
 }
 
+func (d *DumplingBin) Run(opts interface{}) error {
+	opt, ok := opts.(DumplingOpts)
+	if !ok {
+		return errors.New("dumpling running with incompatible opt")
+	}
+	if !opt.SkipCSV {
+		if err := d.Dump(opt, "csv"); err != nil {
+			return err
+		}
+	}
+	if !opt.SkipSQL {
+		if err := d.Dump(opt, "sql"); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 type DumplingFileType int
 
 type DumplingOpts struct {
 	TargetDir string
 	SplitRows int
-	FileType  string
 	LogPath   string
+	SkipSQL   bool
+	SkipCSV   bool
 
 	Cluster *utils.Cluster
+
+	Extra []string
 }

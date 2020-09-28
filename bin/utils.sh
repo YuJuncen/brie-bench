@@ -1,6 +1,7 @@
 export BLUE_FONT=$'\e[36m'
 export RED_FONT=$'\e[31m'
 export RESET_FONT=$'\e[0m'
+export GREEN_FONT=$'\e[32m'
 
 fail() {
     echo -e "$RED_FONT[$(date "+%Y-%m-%d %H:%M:%S")]$RESET_FONT" $@
@@ -29,6 +30,7 @@ parse_args() {
     export component=${1-""}
     shift
     export other_args="[]"
+    export cargs="[]"
     while [[ $# -gt 0 ]]; do
     case $1 in
     --dry-run )
@@ -40,6 +42,13 @@ parse_args() {
         other_args=`echo $other_args | jq ". += [\"$1\", \"$2\"]"`
         shift
         shift
+        ;;
+    -- )
+        shift
+        while [[ $# -gt 0 ]]; do
+          cargs=`echo $cargs | jq ". += [\"--cargs\", \"$1\"]"`
+          shift
+        done
         ;;
     *)
         other_args=`echo $other_args | jq ". += [\"$1\"]"`

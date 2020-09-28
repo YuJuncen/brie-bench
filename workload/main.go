@@ -6,6 +6,7 @@ import (
 	components "github.com/yujuncen/brie-bench/workload/components"
 	"github.com/yujuncen/brie-bench/workload/config"
 	"github.com/yujuncen/brie-bench/workload/utils"
+	"github.com/yujuncen/brie-bench/workload/utils/pd"
 	"go.uber.org/zap"
 	"time"
 )
@@ -59,5 +60,8 @@ func main() {
 	}
 	component, err := parseComponent(config.C.Component)
 	utils.Must(err)
+	if config.C.Disturbance {
+		utils.Must(pd.DefaultClient.EnableScheduler([]string{cluster.PdAddr}, pd.Schedulers...))
+	}
 	utils.Must(startComponent(component, cluster, config.C))
 }

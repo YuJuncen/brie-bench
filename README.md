@@ -28,11 +28,32 @@ The cluster ID can be absent, and then you can select one from recent requests.
 
 ### Parameters
 
-For now, `BR` is the only supported component. Below lists other command line parameters.
+For now, `BR` and `Dumpling` are supported component. Below lists other command line parameters.
 
 - `--hash`: The commit hash of the component.
 - `--workload`: The workload to run.
 - `--repo`: The repository the component built from.
+- `--`: All flags after this would be passed to the component directly, aware this might be overridden by the framework.  
  
- 
+### Component workload
+
+For now, for all components, the workload is a snapshot of the database. It can be represented by many forms: including
+BR backup, CSV or SQL files. 
+
+Each component should do several cases (steps) with this workload, as described below.
+
+#### BR
+
+Input: a BR backup instance.
+
+1. BR will restore the backup to the cluster.
+2. BR will backup the cluster to another place. (can be skipped by `--br.skip-backup`)
+
+#### dumpling
+
+Input: a BR backup instance.
+
+1. The framework will restore the backup to the cluster.
+2. Dumpling will dump the cluster to CSV file. (can be skipped by `--dumpling.skip-csv`)
+3.   Dumpling will dump the cluster to CSV file. (can be skipped by `--dumpling.skip-sql`)
 

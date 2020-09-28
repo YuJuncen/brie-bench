@@ -5,11 +5,13 @@ import (
 	"os"
 )
 
+// Repo is a github repo that be cloned to local.
 type Repo struct {
 	remote string
 	local  string
 }
 
+// CloneHash clones a specified version of the remote repository.
 func CloneHash(remote, to, hash string) (*Repo, error) {
 	repo, err := Clone(remote, to)
 	if err != nil {
@@ -24,6 +26,7 @@ func CloneHash(remote, to, hash string) (*Repo, error) {
 	return repo, nil
 }
 
+// CloneHash clones the remote repository.
 func Clone(remote, to string) (*Repo, error) {
 	if to == "" {
 		var err error
@@ -39,12 +42,14 @@ func Clone(remote, to string) (*Repo, error) {
 	return &Repo{remote: remote, local: to}, nil
 }
 
+// ResetHard reset the repository version by a commit hash.
 func (r *Repo) ResetHard(hash string) error {
 	return utils.NewCommand("git", "reset", "--hard", hash).
 		Opt(utils.SystemOutput, utils.WorkDir(r.local)).
 		Run()
 }
 
+// Make run the `make` command in the local repository.
 func (r *Repo) Make(targets ...string) error {
 	return utils.NewCommand("make", targets...).
 		Opt(utils.SystemOutput, utils.WorkDir(r.local)).

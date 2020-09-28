@@ -12,6 +12,8 @@ type Config struct {
 	DebugComponent bool
 	Disturbance    bool
 
+	ComponentArgs []string
+
 	Dumpling Dumpling
 	BR       BR
 }
@@ -21,7 +23,8 @@ type BR struct {
 }
 
 type Dumpling struct {
-	FileType string
+	SkipCSV bool
+	SkipSQL bool
 }
 
 // C is the global config object
@@ -34,8 +37,10 @@ func Init() {
 	flag.StringVar(&C.Workload, "workload", "tpcc1000", "specify the workload")
 	flag.BoolVar(&C.DebugComponent, "debug-component", false, "component will generate debug level log if enabled")
 	flag.BoolVar(&C.Disturbance, "disturbance", false, "enable shuffle-{leader,region,hot-region}-scheduler to simulate extreme environment")
+	flag.StringSliceVar(&C.ComponentArgs, "cargs", []string{}, "(unsafe) pass extra argument to the component, may conflict with args provided by the framework")
 
-	flag.StringVar(&C.Dumpling.FileType, "dumpling.filetype", "sql", "the file type of dumpling")
-	flag.BoolVar(&C.BR.SkipBackup, "br.skip-backup", false, "skip the ")
+	flag.BoolVar(&C.Dumpling.SkipCSV, "dumpling.skip-csv", false, "skip dumpling to csv step in dumpling benching")
+	flag.BoolVar(&C.Dumpling.SkipSQL, "dumpling.skip-sql", false, "skip dumpling to sql step in dumpling benching")
+	flag.BoolVar(&C.BR.SkipBackup, "br.skip-backup", false, "skip the backup step of br benching")
 	flag.Parse()
 }
