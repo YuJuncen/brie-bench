@@ -3,6 +3,7 @@ module github.com/yujuncen/brie-bench/workload
 go 1.14
 
 require (
+	github.com/aws/aws-sdk-go v1.27.0
 	github.com/jinzhu/gorm v1.9.16
 	github.com/pingcap/check v0.0.0-20200212061837-5e12011dc712 // indirect
 	github.com/pingcap/errors v0.11.4

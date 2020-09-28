@@ -42,9 +42,15 @@ func (d *DumplingBin) Run(opts interface{}) error {
 		return errors.New("dumpling running with incompatible opt")
 	}
 	begin := time.Now()
+	host, port, err := utils.HostAndPort(opt.Cluster.TidbAddr)
+	if err != nil {
+		return err
+	}
 	binOpts := []string{
 		"--output", opt.TargetDir,
 		"--filetype", opt.FileType,
+		"--host", host,
+		"--port", port,
 	}
 	if opt.SplitRows > 0 {
 		binOpts = append(binOpts, []string{"--rows", strconv.Itoa(opt.SplitRows)}...)
@@ -74,4 +80,6 @@ type DumplingOpts struct {
 	SplitRows int
 	FileType  string
 	LogPath   string
+
+	Cluster *utils.Cluster
 }

@@ -42,12 +42,17 @@ basic_json=`echo '{
 }' | jq ".cluster_workload.args+=[\"--component\", \"$component\"]"`
 
 basic_json=`echo $basic_json | jq ".cluster_workload.args+=$other_args | .cluster_request.name=\"$component-bench\""`
+if [ $component = "dumpling" ]; then
+  basic_json=`echo $basic_json | jq ".cluster_request.restore_path=\"mybucket/$workload\""`
+fi
 
 log running with request
 log $basic_json
 
 if [ ! ${dry_run-""} ]; then
-  cluster_id=$(curl 172.16.5.110:8000/api/cluster/test -XPOST -d "$basic_json" | jq ".cluster_request_id")
+  log requesting...
+  cluster_id=$(curl -# 172.16.5.110:8000/api/cluster/test -XPOST -d "$basic_json" | jq ".cluster_request_id")
   add_cluster $cluster_id
+  log request success, cluster ID: $cluster_id
 fi
 set +eu

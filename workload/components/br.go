@@ -25,11 +25,14 @@ type BRWorkload struct {
 	name           string
 }
 
+type BRRunType int
+
 type BROption struct {
 	Cluster     *utils.Cluster
 	LogDir      string
 	Workload    BRWorkload
 	UseDebugLog bool
+	SkipBackup  bool
 }
 
 func (br BRRunner) Restore(opt BROption) error {

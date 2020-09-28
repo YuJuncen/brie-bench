@@ -35,6 +35,12 @@ parse_args() {
         export dry_run=1
         shift
         ;;
+    --workload )
+        export workload=$2
+        other_args=`echo $other_args | jq ". += [\"$1\", \"$2\"]"`
+        shift
+        shift
+        ;;
     *)
         other_args=`echo $other_args | jq ". += [\"$1\"]"`
         shift

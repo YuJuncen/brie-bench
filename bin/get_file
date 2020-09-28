@@ -20,7 +20,7 @@ if [ $(echo "$key" | wc -l) -gt 1 ]; then
 fi
 
 if [ ${2-""} ]; then
-  mc cat minio/artifacts/$1/${key}${2}
+  mc cat minio/artifacts/$cluster_id/${key}${2}
 else
   files=$(mc ls --json minio/artifacts/$cluster_id/${key} | jq -r ".key")
   if [ ! "$files" ]; then

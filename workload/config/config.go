@@ -13,6 +13,11 @@ type Config struct {
 	Disturbance    bool
 
 	Dumpling Dumpling
+	BR       BR
+}
+
+type BR struct {
+	SkipBackup bool
 }
 
 type Dumpling struct {
@@ -30,6 +35,7 @@ func Init() {
 	flag.BoolVar(&C.DebugComponent, "debug-component", false, "component will generate debug level log if enabled")
 	flag.BoolVar(&C.Disturbance, "disturbance", false, "enable shuffle-{leader,region,hot-region}-scheduler to simulate extreme environment")
 
-	flag.StringVar(&C.Dumpling.FileType, "", "sql", "the file type of dumpling")
+	flag.StringVar(&C.Dumpling.FileType, "dumpling.filetype", "sql", "the file type of dumpling")
+	flag.BoolVar(&C.BR.SkipBackup, "br.skip-backup", false, "skip the ")
 	flag.Parse()
 }
