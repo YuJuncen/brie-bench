@@ -1,15 +1,50 @@
 package main
 
 import (
+	"errors"
 	"github.com/pingcap/log"
 	components "github.com/yujuncen/brie-bench/workload/components"
 	"github.com/yujuncen/brie-bench/workload/config"
 	"github.com/yujuncen/brie-bench/workload/utils"
-	"github.com/yujuncen/brie-bench/workload/utils/pd"
 	"go.uber.org/zap"
+	"time"
 )
 
-const Artifacts = "/artifacts"
+func startComponent(component components.Component, cluster *utils.Cluster, conf config.Config) error {
+	buildOpts := components.BuildOptions{
+		Hash:       conf.Hash,
+		Repository: conf.Repo,
+	}
+	if buildOpts.Repository == "" {
+		buildOpts.Repository = component.DefaultRepo()
+	}
+	start := time.Now()
+	log.Info("build with options", zap.Any("options", buildOpts))
+	bin, err := component.Build(buildOpts)
+	if err != nil {
+		return err
+	}
+	runOpts := bin.MakeOptionsWith(conf, cluster)
+	log.Info("Run with options", zap.Any("options", runOpts), zap.Duration("build-time-cost", time.Since(start)))
+	runStart := time.Now()
+	if err := bin.Run(runOpts); err != nil {
+		return err
+	}
+	log.Info("Run ended", zap.Duration("run-time-cost", time.Since(runStart)))
+	return nil
+}
+
+func parseComponent(name string) (components.Component, error) {
+	switch name {
+	case "br":
+		return components.NewBR(), nil
+	case "dumpling":
+		return components.NewDumpling(), nil
+	default:
+		log.Error("Your component isn't supported.", zap.String("component", config.C.Component))
+		return nil, errors.New("unsupported component")
+	}
+}
 
 func main() {
 	config.Init()
@@ -22,50 +57,7 @@ func main() {
 	if err := utils.DumpEnv(); err != nil {
 		log.Warn("failed to dump env ", zap.Error(err))
 	}
-	switch config.C.Component {
-	case "br":
-		br := components.NewBR()
-		buildOptions := components.BuildOptions{
-			Repository: config.C.Repo,
-			Hash:       config.C.Hash,
-		}
-		if buildOptions.Repository == "" {
-			buildOptions.Repository = "https://github.com/pingcap/br"
-		}
-		log.Info("build with options", zap.Any("options", buildOptions))
-		ibr, err := br.Build(buildOptions)
-		utils.Must(err)
-		opts := components.BROption{
-			Workload:    components.ParseWorkload(config.C.Workload),
-			LogDir:      Artifacts,
-			Cluster:     cluster,
-			UseDebugLog: config.C.DebugComponent,
-		}
-		if config.C.Disturbance {
-			utils.Must(pd.DefaultClient.EnableScheduler([]string{cluster.PdAddr}, pd.Schedulers...))
-		}
-		log.Info("Run with options", zap.Any("options", opts))
-		utils.Must(ibr.Run(opts))
-	case "dumpling":
-		dumpling := components.NewDumpling()
-		buildOptions := components.BuildOptions{
-			Repository: config.C.Repo,
-			Hash:       config.C.Hash,
-		}
-		if buildOptions.Repository == "" {
-			buildOptions.Repository = "https://github.com/pingcap/dumpling"
-		}
-		dumpbin, err := dumpling.Build(buildOptions)
-		utils.Must(err)
-		opts := components.DumplingOpts{
-			TargetDir: "/tmp/dumped",
-			SplitRows: 0,
-			FileType:  config.C.Dumpling.FileType,
-			LogPath:   Artifacts,
-		}
-		utils.Must(dumpbin.Run(opts))
-
-	default:
-		log.Panic("Your component isn't supported.\n", zap.String("component", config.C.Component))
-	}
+	component, err := parseComponent(config.C.Component)
+	utils.Must(err)
+	utils.Must(startComponent(component, cluster, config.C))
 }

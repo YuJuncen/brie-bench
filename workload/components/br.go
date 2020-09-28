@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/pingcap/log"
+	"github.com/yujuncen/brie-bench/workload/config"
 	"github.com/yujuncen/brie-bench/workload/utils"
 	"github.com/yujuncen/brie-bench/workload/utils/git"
 	"go.uber.org/zap"
@@ -11,14 +12,32 @@ import (
 	"time"
 )
 
-const S3Args = `access-key=YOURACCESSKEY&secret-access-key=YOURSECRETKEY&endpoint=http://172.16.4.4:30812`
+const (
+	S3Args        = `access-key=YOURACCESSKEY&secret-access-key=YOURSECRETKEY&endpoint=http://172.16.4.4:30812`
+	BRDefaultRepo = `https://github.com/pingcap/br`
+)
 
 var TempBackupStorage = fmt.Sprintf(`s3://brie/backup?%s`, S3Args)
 
 type BR struct{}
-type BRRunner struct {
+
+func (B BR) DefaultRepo() string {
+	return BRDefaultRepo
+}
+
+type BRBin struct {
 	binary string
 }
+
+func (br BRBin) MakeOptionsWith(conf config.Config, cluster *utils.Cluster) interface{} {
+	return BROption{
+		Workload:    ParseWorkload(conf.Workload),
+		LogDir:      config.Artifacts,
+		Cluster:     cluster,
+		UseDebugLog: conf.DebugComponent,
+	}
+}
+
 type BRWorkload struct {
 	backupStorage  string
 	restoreStorage string
@@ -35,7 +54,7 @@ type BROption struct {
 	SkipBackup  bool
 }
 
-func (br BRRunner) Restore(opt BROption) error {
+func (br BRBin) Restore(opt BROption) error {
 	restoreStart := time.Now()
 	restoreCliOpts := []string{
 		"restore", "full",
@@ -57,7 +76,7 @@ func (br BRRunner) Restore(opt BROption) error {
 	return nil
 }
 
-func (br BRRunner) Backup(opt BROption) error {
+func (br BRBin) Backup(opt BROption) error {
 	backupStart := time.Now()
 	backupCliOpts := []string{
 		"backup", "full",
@@ -79,7 +98,7 @@ func (br BRRunner) Backup(opt BROption) error {
 	return nil
 }
 
-func (br BRRunner) Run(opts interface{}) error {
+func (br BRBin) Run(opts interface{}) error {
 	opt, ok := opts.(BROption)
 	if !ok {
 		return errors.New("bad BR option")
@@ -93,7 +112,7 @@ func (br BRRunner) Run(opts interface{}) error {
 	return nil
 }
 
-func (B BR) Build(opts BuildOptions) (BuiltComponent, error) {
+func (B BR) Build(opts BuildOptions) (ComponentBinary, error) {
 	repo, err := git.CloneHash(opts.Repository, "/br", opts.Hash)
 	if err != nil {
 		return nil, err
@@ -101,7 +120,7 @@ func (B BR) Build(opts BuildOptions) (BuiltComponent, error) {
 	if err := repo.Make("build"); err != nil {
 		return nil, err
 	}
-	return BRRunner{"/br/bin/br"}, nil
+	return BRBin{"/br/bin/br"}, nil
 }
 
 func NewBR() Component {

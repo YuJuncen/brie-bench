@@ -3,6 +3,7 @@ package component
 import (
 	"errors"
 	"github.com/pingcap/log"
+	"github.com/yujuncen/brie-bench/workload/config"
 	"github.com/yujuncen/brie-bench/workload/utils"
 	"github.com/yujuncen/brie-bench/workload/utils/git"
 	"go.uber.org/zap"
@@ -13,13 +14,21 @@ import (
 	"time"
 )
 
+const (
+	DumplingDefaultRepo = `https://github.com/pingcap/dumpling`
+)
+
 type Dumpling struct{}
+
+func (d Dumpling) DefaultRepo() string {
+	return DumplingDefaultRepo
+}
 
 func NewDumpling() Component {
 	return Dumpling{}
 }
 
-func (d Dumpling) Build(opts BuildOptions) (BuiltComponent, error) {
+func (d Dumpling) Build(opts BuildOptions) (ComponentBinary, error) {
 	repo, err := git.CloneHash(opts.Repository, "/dumpling", opts.Hash)
 	if err != nil {
 		return nil, err
@@ -34,6 +43,16 @@ func (d Dumpling) Build(opts BuildOptions) (BuiltComponent, error) {
 
 type DumplingBin struct {
 	binary string
+}
+
+func (d *DumplingBin) MakeOptionsWith(conf config.Config, cluster *utils.Cluster) interface{} {
+	return DumplingOpts{
+		TargetDir: "/tmp/dumped",
+		SplitRows: 0,
+		FileType:  conf.Dumpling.FileType,
+		LogPath:   config.Artifacts,
+		Cluster:   cluster,
+	}
 }
 
 func (d *DumplingBin) Run(opts interface{}) error {
