@@ -1,13 +1,20 @@
-FROM golang:1.14-alpine
+FROM golang:1.14-alpine as builder
 ENV GO111MODULE=on
 ENV GOPROXY=https://goproxy.io,direct
+
+WORKDIR /brie
+COPY ./workload .
+
+RUN go build -o bin/run
+
+FROM golang:1.14-alpine
+WORKDIR /brie
 ENV ARTIFICATS=/artifacts
 ENV hash=""
 ENV workload=""
 ENV target="none"
-
-WORKDIR /brie
-COPY ./workload .
+ENV GO111MODULE=on
+ENV GOPROXY=https://goproxy.io,direct
 
 RUN apk add --no-cache \
     make \
@@ -15,8 +22,9 @@ RUN apk add --no-cache \
     bash \
     curl \
     gcc \
-    g++ 
-
+    g++
 RUN mkdir $ARTIFICATS
-RUN go build -o bin/run
+COPY --from=builder /brie/bin/run bin/run
+
 CMD ["bin/run", "--help"]
+
