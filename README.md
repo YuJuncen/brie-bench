@@ -7,7 +7,7 @@ This repository contains the workload and some utils to run those cases.
 ## usage
 
 ```bash
-bin/exec component [--dry-run] [args passing to main.go...]
+bin/exec component [--dry-run] [args passing to main.go...] [-- [args passing to the component...]] 
 ```
 
 This command will make request to the default API server(172.16.5.110:8000), 
@@ -55,5 +55,5 @@ Input: a BR backup instance.
 
 1. The framework will restore the backup to the cluster.
 2. Dumpling will dump the cluster to CSV file. (can be skipped by `--dumpling.skip-csv`)
-3.   Dumpling will dump the cluster to CSV file. (can be skipped by `--dumpling.skip-sql`)
+3. Dumpling will dump the cluster to CSV file. (can be skipped by `--dumpling.skip-sql`)
 

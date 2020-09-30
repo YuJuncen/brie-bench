@@ -11,7 +11,7 @@ select_file() {
   path=$1
   files=$(mc ls --json "$path" | jq -r ".key")
   if [ ! "$files" ]; then
-    fail "no file found in cluster $cluster_id"
+    fail "no file found in cluster $cluster_id (the bench hasn't done yet?)"
   fi
   echo "$GREEN_FONT[$path]$RESET_FONT select file: "
   select file in $files; do

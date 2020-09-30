@@ -14,8 +14,9 @@ type Config struct {
 
 	ComponentArgs []string
 
-	Dumpling Dumpling
-	BR       BR
+	Dumpling  Dumpling
+	BR        BR
+	Lightning Lightning
 }
 
 type BR struct {
@@ -25,6 +26,11 @@ type BR struct {
 type Dumpling struct {
 	SkipCSV bool
 	SkipSQL bool
+}
+
+type Lightning struct {
+	SkipLocal bool
+	SkipTiDB  bool
 }
 
 // C is the global config object
@@ -42,5 +48,7 @@ func Init() {
 	flag.BoolVar(&C.Dumpling.SkipCSV, "dumpling.skip-csv", false, "skip dumpling to csv step in dumpling benching")
 	flag.BoolVar(&C.Dumpling.SkipSQL, "dumpling.skip-sql", false, "skip dumpling to sql step in dumpling benching")
 	flag.BoolVar(&C.BR.SkipBackup, "br.skip-backup", false, "skip the backup step of br benching")
+	flag.BoolVar(&C.Lightning.SkipTiDB, "lightning.skip-tidb", false, "skip testing lightning with TiDB backend")
+	flag.BoolVar(&C.Lightning.SkipLocal, "lightning.skip-local", false, "skip testing lightning with local backend")
 	flag.Parse()
 }

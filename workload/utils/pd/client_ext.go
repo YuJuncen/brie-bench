@@ -37,7 +37,7 @@ func (c ClientExt) EnableScheduler(pdAddrs []string, schedulers ...string) error
 	for _, pd := range pdAddrs {
 		for _, scheduler := range schedulers {
 			body := bytes.NewBuffer([]byte(fmt.Sprintf(`{"name": "%s"}`, strings.ReplaceAll(scheduler, `"`, `\"`))))
-			url := fmt.Sprintf("%s/%s", pd, schedulerPrefix)
+			url := fmt.Sprintf("http://%s/%s", pd, schedulerPrefix)
 			req, err := http.NewRequest(http.MethodPost, url, body)
 			if err != nil {
 				return err

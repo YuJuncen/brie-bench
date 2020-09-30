@@ -2,7 +2,6 @@
 
 set -eu
 
-
 if ! source bin/utils.sh; then
     echo "failed to load the utils package. make sure bin/utils.sh exists"
     exit 1
@@ -12,4 +11,8 @@ if [ $cluster_id = '.' ]; then
   cluster_id=`get_last_cluster`
 fi
 
+log "cluster info"
 curl -s 172.16.5.110:8000/api/cluster/$cluster_id | jq
+
+log "cluster resource"
+curl -s 172.16.5.110:8000/api/cluster/resource/$cluster_id | jq '.[] | {"components": .components, "ip": .ip} | select(.components != "")'

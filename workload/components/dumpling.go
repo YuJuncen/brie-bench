@@ -10,7 +10,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"strconv"
 	"time"
 )
 
@@ -48,8 +47,8 @@ type DumplingBin struct {
 func (d *DumplingBin) MakeOptionsWith(conf config.Config, cluster *utils.Cluster) interface{} {
 	return DumplingOpts{
 		TargetDir: "/tmp/dumped",
-		SplitRows: 0,
 		LogPath:   config.Artifacts,
+		Workload:  conf.Workload,
 		Cluster:   cluster,
 
 		SkipSQL: conf.Dumpling.SkipSQL,
@@ -71,9 +70,6 @@ func (d *DumplingBin) Dump(opt DumplingOpts, fileType string) error {
 		"--host", host,
 		"--port", port,
 	}
-	if opt.SplitRows > 0 {
-		binOpts = append(binOpts, []string{"--rows", strconv.Itoa(opt.SplitRows)}...)
-	}
 	binOpts = append(binOpts, opt.Extra...)
 	if err := utils.NewCommand(d.binary, binOpts...).
 		Opt(utils.RedirectTo(path.Join(opt.LogPath, "dumpling.log"))).
@@ -89,8 +85,15 @@ func (d *DumplingBin) Dump(opt DumplingOpts, fileType string) error {
 	}); err != nil {
 		return err
 	}
-	log.Info("dumpling done", zap.Duration("cost", time.Since(begin)))
+	log.Info("dumpling done", zap.Duration("cost", time.Since(begin)),
+		zap.String("workload", opt.Workload),
+		zap.String("filetype", fileType))
 	return nil
+}
+
+func (d *DumplingBin) Cleanup(opts DumplingOpts) error {
+	log.Info("removing dumped files", zap.String("path", opts.TargetDir))
+	return os.RemoveAll(opts.TargetDir)
 }
 
 func (d *DumplingBin) Run(opts interface{}) error {
@@ -103,10 +106,18 @@ func (d *DumplingBin) Run(opts interface{}) error {
 			return err
 		}
 	}
+	if err := d.Cleanup(opt); err != nil {
+		log.Warn("failed to cleanup dumpling result", zap.Error(err))
+		err = nil
+	}
 	if !opt.SkipSQL {
 		if err := d.Dump(opt, "sql"); err != nil {
 			return err
 		}
+	}
+	if err := d.Cleanup(opt); err != nil {
+		log.Warn("failed to cleanup dumpling result", zap.Error(err))
+		err = nil
 	}
 	return nil
 }
@@ -115,8 +126,8 @@ type DumplingFileType int
 
 type DumplingOpts struct {
 	TargetDir string
-	SplitRows int
 	LogPath   string
+	Workload  string
 	SkipSQL   bool
 	SkipCSV   bool
 
