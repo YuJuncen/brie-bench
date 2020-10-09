@@ -19,7 +19,7 @@ type TempS3Storage struct {
 	svc     *s3.S3
 }
 
-func (s TempS3Storage) Connect() error {
+func (s *TempS3Storage) Connect() error {
 	qs := s.opts
 	awsConfig := aws.NewConfig().
 		WithMaxRetries(3).
@@ -51,20 +51,20 @@ func (s TempS3Storage) Connect() error {
 	return nil
 }
 
-func ConnectToS3(url string) (TempS3Storage, error) {
+func ConnectToS3(url string) (*TempS3Storage, error) {
 	backend, err := storage.ParseBackend(url, &storage.BackendOptions{})
 	if err != nil {
-		return TempS3Storage{}, err
+		return nil, err
 	}
 	s3Opts := backend.GetS3()
-	s := TempS3Storage{opts: s3Opts, Raw: url}
+	s := &TempS3Storage{opts: s3Opts, Raw: url}
 	if err := s.Connect(); err != nil {
-		return TempS3Storage{}, nil
+		return nil, nil
 	}
 	return s, nil
 }
 
-func (s TempS3Storage) Cleanup() error {
+func (s *TempS3Storage) Cleanup() error {
 	var marker *string
 	req := &s3.ListObjectsInput{
 		Bucket:  aws.String(s.opts.Bucket),

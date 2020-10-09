@@ -10,7 +10,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-	"time"
 )
 
 const (
@@ -59,7 +58,6 @@ func (d *DumplingBin) MakeOptionsWith(conf config.Config, cluster *utils.Cluster
 }
 
 func (d *DumplingBin) Dump(opt DumplingOpts, fileType string) error {
-	begin := time.Now()
 	host, port, err := utils.HostAndPort(opt.Cluster.TidbAddr)
 	if err != nil {
 		return err
@@ -71,9 +69,9 @@ func (d *DumplingBin) Dump(opt DumplingOpts, fileType string) error {
 		"--port", port,
 	}
 	binOpts = append(binOpts, opt.Extra...)
-	if err := utils.NewCommand(d.binary, binOpts...).
-		Opt(utils.RedirectTo(path.Join(opt.LogPath, "dumpling.log"))).
-		Run(); err != nil {
+	cmd := utils.NewCommand(d.binary, binOpts...).
+		Opt(utils.RedirectTo(path.Join(opt.LogPath, "dumpling.log")))
+	if err := utils.Bench("dump to "+fileType, cmd.Run); err != nil {
 		return err
 	}
 	if err := filepath.Walk(opt.TargetDir, func(path string, info os.FileInfo, err error) error {
@@ -85,9 +83,6 @@ func (d *DumplingBin) Dump(opt DumplingOpts, fileType string) error {
 	}); err != nil {
 		return err
 	}
-	log.Info("dumpling done", zap.Duration("cost", time.Since(begin)),
-		zap.String("workload", opt.Workload),
-		zap.String("filetype", fileType))
 	return nil
 }
 

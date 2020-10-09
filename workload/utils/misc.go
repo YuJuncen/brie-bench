@@ -3,7 +3,10 @@ package utils
 import (
 	"errors"
 	"fmt"
+	"github.com/pingcap/log"
+	"go.uber.org/zap"
 	"strings"
+	"time"
 )
 
 var NOPIO = NIO{}
@@ -26,4 +29,13 @@ func HostAndPort(addr string) (host string, port string, err error) {
 	}
 	host, port = addr[:delim], addr[delim+1:]
 	return
+}
+
+// Bench runs the task, with logging the time cost.
+func Bench(name string, task func() error) error {
+	start := time.Now()
+	defer func() {
+		log.Info("bench task done", zap.String("name", name), zap.Duration("cost", time.Since(start)))
+	}()
+	return task()
 }
