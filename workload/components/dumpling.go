@@ -122,8 +122,6 @@ func (d *DumplingBin) Run(opts interface{}) error {
 	return nil
 }
 
-type DumplingFileType int
-
 type DumplingOpts struct {
 	TargetDir string
 	LogPath   string

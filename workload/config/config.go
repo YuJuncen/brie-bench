@@ -5,12 +5,13 @@ import (
 )
 
 type Config struct {
-	Component      string
-	Hash           string
-	Repo           string
-	Workload       string
-	DebugComponent bool
-	Disturbance    bool
+	Component        string
+	Hash             string
+	Repo             string
+	Workload         string
+	DebugComponent   bool
+	Disturbance      bool
+	TemporaryStorage string
 
 	ComponentArgs []string
 
@@ -44,6 +45,7 @@ func Init() {
 	flag.BoolVar(&C.DebugComponent, "debug-component", false, "component will generate debug level log if enabled")
 	flag.BoolVar(&C.Disturbance, "disturbance", false, "enable shuffle-{leader,region,hot-region}-scheduler to simulate extreme environment")
 	flag.StringSliceVar(&C.ComponentArgs, "cargs", []string{}, "(unsafe) pass extra argument to the component, may conflict with args provided by the framework")
+	flag.StringVar(&C.TemporaryStorage, "temp-storage", "", "(with br syntax) specify the storage where the intermedia data stores.")
 
 	flag.BoolVar(&C.Dumpling.SkipCSV, "dumpling.skip-csv", false, "skip dumpling to csv step in dumpling benching")
 	flag.BoolVar(&C.Dumpling.SkipSQL, "dumpling.skip-sql", false, "skip dumpling to sql step in dumpling benching")

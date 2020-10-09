@@ -7,6 +7,7 @@ import (
 	"github.com/yujuncen/brie-bench/workload/config"
 	"github.com/yujuncen/brie-bench/workload/utils"
 	"github.com/yujuncen/brie-bench/workload/utils/git"
+	"github.com/yujuncen/brie-bench/workload/utils/storage"
 	"go.uber.org/zap"
 	"path"
 	"time"
@@ -17,7 +18,7 @@ const (
 	BRDefaultRepo = `https://github.com/pingcap/br`
 )
 
-var TempBackupStorage = fmt.Sprintf(`s3://brie/backup?%s`, S3Args)
+var TempBackupStorage = fmt.Sprintf(`storage://brie/backup?%s`, S3Args)
 
 type BR struct{}
 
@@ -30,7 +31,7 @@ type BRBin struct {
 }
 
 func (br BRBin) MakeOptionsWith(conf config.Config, cluster *utils.Cluster) interface{} {
-	return BROption{
+	opt := BROption{
 		Workload:    ParseWorkload(conf.Workload),
 		LogDir:      config.Artifacts,
 		Cluster:     cluster,
@@ -38,12 +39,17 @@ func (br BRBin) MakeOptionsWith(conf config.Config, cluster *utils.Cluster) inte
 		SkipBackup:  conf.BR.SkipBackup,
 		Extra:       conf.ComponentArgs,
 	}
+	if conf.TemporaryStorage != "" {
+		log.Info("use other temporary storage", zap.String("url", conf.TemporaryStorage))
+		opt.Workload.backupStorageURL = conf.TemporaryStorage
+	}
+	return opt
 }
 
 type BRWorkload struct {
-	backupStorage  string
-	restoreStorage string
-	name           string
+	backupStorageURL  string
+	restoreStorageURL string
+	name              string
 }
 
 type BRRunType int
@@ -64,7 +70,7 @@ func (br BRBin) Restore(opt BROption) error {
 		"restore", "full",
 		"--log-file", path.Join(opt.LogDir, "restore.log"),
 		"--pd", opt.Cluster.PdAddr,
-		"-s", opt.Workload.restoreStorage,
+		"-s", opt.Workload.restoreStorageURL,
 	}
 	if opt.UseDebugLog {
 		restoreCliOpts = append(restoreCliOpts, []string{"--log-level", "DEBUG"}...)
@@ -81,13 +87,18 @@ func (br BRBin) Restore(opt BROption) error {
 	return nil
 }
 
-func (br BRBin) Backup(opt BROption) error {
+func (br BRBin) Backup(opt BROption, storage storage.TempS3Storage) error {
+	defer func() {
+		if err := storage.Cleanup(); err != nil {
+			log.Info("failed to cleanup backup", zap.Error(err), zap.String("storage", storage.Raw))
+		}
+	}()
 	backupStart := time.Now()
 	backupCliOpts := []string{
 		"backup", "full",
 		"--log-file", path.Join(opt.LogDir, "backup.log"),
 		"--pd", opt.Cluster.PdAddr,
-		"-s", opt.Workload.backupStorage,
+		"-s", storage.Raw,
 	}
 	if opt.UseDebugLog {
 		backupCliOpts = append(backupCliOpts, []string{"--log-level", "DEBUG"}...)
@@ -112,7 +123,11 @@ func (br BRBin) Run(opts interface{}) error {
 	if err := br.Restore(opt); err != nil {
 		return err
 	}
-	if err := br.Backup(opt); err != nil {
+	s, err := storage.ConnectToS3(opt.Workload.backupStorageURL)
+	if err != nil {
+		return err
+	}
+	if err := br.Backup(opt, s); err != nil {
 		return err
 	}
 	return nil
@@ -135,17 +150,17 @@ func NewBR() Component {
 
 func TPCCWorkload() BRWorkload {
 	return BRWorkload{
-		backupStorage:  TempBackupStorage,
-		restoreStorage: fmt.Sprintf("s3://mybucket/tpcc1000?%s", S3Args),
-		name:           "TPCC-1000",
+		backupStorageURL:  TempBackupStorage,
+		restoreStorageURL: fmt.Sprintf("storage://mybucket/tpcc1000?%s", S3Args),
+		name:              "TPCC-1000",
 	}
 }
 
 func YCSBWorkload() BRWorkload {
 	return BRWorkload{
-		backupStorage:  TempBackupStorage,
-		restoreStorage: fmt.Sprintf("s3://mybucket/ycsb?%s", S3Args),
-		name:           "YCSB",
+		backupStorageURL:  TempBackupStorage,
+		restoreStorageURL: fmt.Sprintf("storage://mybucket/ycsb?%s", S3Args),
+		name:              "YCSB",
 	}
 }
 

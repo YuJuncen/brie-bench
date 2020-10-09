@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-var NopIO = NIO{}
+var NOPIO = NIO{}
 
 type NIO struct{}
 
