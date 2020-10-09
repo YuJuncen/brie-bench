@@ -41,6 +41,8 @@ func parseComponent(name string) (components.Component, error) {
 		return components.NewBR(), nil
 	case "dumpling":
 		return components.NewDumpling(), nil
+	case "lightning":
+		return components.NewLightning(), nil
 	default:
 		log.Error("Your component isn't supported.", zap.String("component", config.C.Component))
 		return nil, errors.New("unsupported component")
@@ -56,7 +58,7 @@ func main() {
 		log.Warn("failed to dump cluster info", zap.Error(err))
 	}
 	if err := utils.DumpEnv(); err != nil {
-		log.Warn("failed to dump env ", zap.Error(err))
+		log.Warn("failed to dump env", zap.Error(err))
 	}
 	component, err := parseComponent(config.C.Component)
 	utils.Must(err)

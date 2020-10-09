@@ -12,8 +12,17 @@ import (
 )
 
 type Lightning struct{}
+
+func (l Lightning) DefaultRepo() string {
+	return "github.com/"
+}
+
 type LightningBin struct {
 	binary string
+}
+
+func NewLightning() Component {
+	return Lightning{}
 }
 
 func (l *LightningBin) MakeOptionsWith(conf config.Config, cluster *utils.Cluster) interface{} {

@@ -57,3 +57,8 @@ Input: a BR backup instance.
 2. Dumpling will dump the cluster to CSV file. (can be skipped by `--dumpling.skip-csv`)
 3. Dumpling will dump the cluster to CSV file. (can be skipped by `--dumpling.skip-sql`)
 
+#### Lightning
+
+Input: a Folder of CSV or SQL, and which backend to use (can be specified by `--lightning.backend`).
+
+1. Lightning will run that case.

@@ -32,9 +32,9 @@ type BRBin struct {
 func (br BRBin) MakeOptionsWith(conf config.Config, cluster *utils.Cluster) interface{} {
 	opt := BROption{
 		Workload: BRWorkload{
-			name:              conf.Workload,
-			backupStorageURL:  TempBackupStorage,
-			restoreStorageURL: conf.WorkloadStorage,
+			Name:              conf.Workload,
+			BackupStorageURL:  TempBackupStorage,
+			RestoreStorageURL: conf.WorkloadStorage,
 		},
 		LogDir:      config.Artifacts,
 		Cluster:     cluster,
@@ -44,15 +44,15 @@ func (br BRBin) MakeOptionsWith(conf config.Config, cluster *utils.Cluster) inte
 	}
 	if conf.TemporaryStorage != "" {
 		log.Info("use other temporary storage", zap.String("url", conf.TemporaryStorage))
-		opt.Workload.backupStorageURL = conf.TemporaryStorage
+		opt.Workload.BackupStorageURL = conf.TemporaryStorage
 	}
 	return opt
 }
 
 type BRWorkload struct {
-	backupStorageURL  string
-	restoreStorageURL string
-	name              string
+	BackupStorageURL  string
+	RestoreStorageURL string
+	Name              string
 }
 
 type BRRunType int
@@ -72,7 +72,7 @@ func (br BRBin) Restore(opt BROption) error {
 		"restore", "full",
 		"--log-file", path.Join(opt.LogDir, "restore.log"),
 		"--pd", opt.Cluster.PdAddr,
-		"-s", opt.Workload.restoreStorageURL,
+		"-s", opt.Workload.RestoreStorageURL,
 	}
 	if opt.UseDebugLog {
 		restoreCliOpts = append(restoreCliOpts, []string{"--log-level", "DEBUG"}...)
@@ -80,7 +80,7 @@ func (br BRBin) Restore(opt BROption) error {
 	restoreCliOpts = append(restoreCliOpts, opt.Extra...)
 	restore := utils.NewCommand(br.binary, restoreCliOpts...)
 	restore.Opt(utils.DropOutput)
-	return utils.Bench(fmt.Sprintf("restore %s", opt.Workload.name), restore.Run)
+	return utils.Bench(fmt.Sprintf("restore %s", opt.Workload.Name), restore.Run)
 }
 
 func (br BRBin) Backup(opt BROption, storage *storage.TempS3Storage) error {
@@ -101,7 +101,7 @@ func (br BRBin) Backup(opt BROption, storage *storage.TempS3Storage) error {
 	backupCliOpts = append(backupCliOpts, opt.Extra...)
 	backup := utils.NewCommand(br.binary, backupCliOpts...)
 	backup.Opt(utils.DropOutput)
-	return utils.Bench(fmt.Sprintf("backup %s", opt.Workload.name), backup.Run)
+	return utils.Bench(fmt.Sprintf("backup %s", opt.Workload.Name), backup.Run)
 }
 
 func (br BRBin) Run(opts interface{}) error {
@@ -112,7 +112,7 @@ func (br BRBin) Run(opts interface{}) error {
 	if err := br.Restore(opt); err != nil {
 		return err
 	}
-	s, err := storage.ConnectToS3(opt.Workload.backupStorageURL)
+	s, err := storage.ConnectToS3(opt.Workload.BackupStorageURL)
 	if err != nil {
 		return err
 	}
