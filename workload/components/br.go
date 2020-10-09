@@ -18,7 +18,7 @@ const (
 	BRDefaultRepo = `https://github.com/pingcap/br`
 )
 
-var TempBackupStorage = fmt.Sprintf(`storage://brie/backup?%s`, S3Args)
+var TempBackupStorage = fmt.Sprintf(`s3://brie/backup?%s`, S3Args)
 
 type BR struct{}
 
@@ -151,7 +151,7 @@ func NewBR() Component {
 func TPCCWorkload() BRWorkload {
 	return BRWorkload{
 		backupStorageURL:  TempBackupStorage,
-		restoreStorageURL: fmt.Sprintf("storage://mybucket/tpcc1000?%s", S3Args),
+		restoreStorageURL: fmt.Sprintf("s3://mybucket/tpcc1000?%s", S3Args),
 		name:              "TPCC-1000",
 	}
 }
@@ -159,7 +159,7 @@ func TPCCWorkload() BRWorkload {
 func YCSBWorkload() BRWorkload {
 	return BRWorkload{
 		backupStorageURL:  TempBackupStorage,
-		restoreStorageURL: fmt.Sprintf("storage://mybucket/ycsb?%s", S3Args),
+		restoreStorageURL: fmt.Sprintf("s3://mybucket/ycsb?%s", S3Args),
 		name:              "YCSB",
 	}
 }
