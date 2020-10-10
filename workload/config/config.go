@@ -32,13 +32,27 @@ type Dumpling struct {
 
 type Lightning struct {
 	Backend string
-	Source  string
+
+	IndexConcurrency uint
+	TableConcurrency uint
+	IOConcurrency    uint
+
+	RegionSplitSize  uint
+	SendKVPairs      uint
+	RangeConcurrency uint
 }
 
 // C is the global config object
 var C Config
 
 func Init() {
+	flag.UintVar(&C.Lightning.IndexConcurrency, "lightning.index-concurrency", 0, "lightning.index-concurrency")
+	flag.UintVar(&C.Lightning.IOConcurrency, "lightning.io-concurrency", 0, "lightning.io-concurrency")
+	flag.UintVar(&C.Lightning.TableConcurrency, "lightning.table-concurrency", 0, "lightning.table-concurrency")
+	flag.UintVar(&C.Lightning.RegionSplitSize, "lightning.region-split-size", 0, "tikv-importer.region-split-size")
+	flag.UintVar(&C.Lightning.SendKVPairs, "lightning.send-kv-pairs", 0, "tikv-importer.send-kv-pairs")
+	flag.UintVar(&C.Lightning.RangeConcurrency, "lightning.range-concurrency", 0, "tikv-importer.range-concurrency")
+
 	flag.StringVar(&C.Component, "component", "", "specify the component to test")
 	flag.StringVar(&C.Hash, "hash", "", "specify the component commit hash")
 	flag.StringVar(&C.Repo, "repo", "", "specify the repository the bench uses")

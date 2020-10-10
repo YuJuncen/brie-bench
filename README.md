@@ -62,3 +62,13 @@ Input: a BR backup instance.
 Input: a Folder of CSV or SQL, and which backend to use (can be specified by `--lightning.backend`).
 
 1. Lightning will run that case.
+
+There are some extra flags for configuring lightning, they would be mapped to 
+variables in the lightning config file when specified. 
+
+- lightning.index-concurrency     (by `--lightning.index-concurrency`)
+- lightning.io-concurrency        (by `--lightning.io-concurrency`) 
+- lightning.table-concurrency     (by `--lightning.table-concurrency`)
+- tikv-importer.region-split-size (by `--lightning.region-split-size`)
+- tikv-importer.send-kv-pairs     (by `--lightning.send-kv-pairs`)
+- tikv-importer.range-concurrency (by `--lightning.range-concurrency`) 

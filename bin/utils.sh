@@ -60,6 +60,7 @@ parse_args() {
 
 add_cluster() {
   echo $1 >> .brie_bench_last_cluster
+  tail -n 30 .brie_bench_last_cluster > .brie_bench_last_cluster
 }
 
 get_cluster() {

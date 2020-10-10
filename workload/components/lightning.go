@@ -63,6 +63,7 @@ const (
 type LightningOpts struct {
 	Backend  LightningBackend
 	Workload LightningWorkload
+	Misc     config.Lightning
 
 	Cluster *utils.Cluster
 
@@ -80,10 +81,12 @@ func (l *LightningBin) ImportLocal(opts LightningOpts) error {
 	if err != nil {
 		return nil
 	}
-	if err := NewLightningConf().To(conf.IO); err != nil {
+	if err := NewLightningConf().FillBy(&opts).To(conf); err != nil {
 		return err
 	}
-	if err := NewLocalBackendConf(path.Join(os.TempDir(), "local-sorting")).To(conf.IO); err != nil {
+	if err := NewLocalBackendConf(path.Join(os.TempDir(), "local-sorting")).
+		FillBy(&opts).
+		To(conf); err != nil {
 		return err
 	}
 
@@ -107,6 +110,13 @@ func (l *LightningBin) ImportTiDB(opts LightningOpts) error {
 	if err != nil {
 		return err
 	}
+	conf, err := NewLightningConfigFile()
+	if err != nil {
+		return nil
+	}
+	if err := NewLightningConf().FillBy(&opts).To(conf); err != nil {
+		return err
+	}
 	cliOpts := make([]string, 0)
 	cliOpts = append(cliOpts, []string{
 		"--backend", "tidb",
@@ -115,6 +125,7 @@ func (l *LightningBin) ImportTiDB(opts LightningOpts) error {
 		"--pd-urls", opts.Cluster.PdAddr,
 		"-d", opts.Workload.Source,
 		"--log-file", path.Join(config.Artifacts, "local.log"),
+		"--config", conf.WriteToDisk(),
 	}...)
 	cliOpts = append(cliOpts, opts.Extra...)
 	cmd := utils.NewCommand(l.binary, cliOpts...)
