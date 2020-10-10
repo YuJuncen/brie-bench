@@ -42,7 +42,7 @@ basic_json=`echo '{
 }' | jq ".cluster_workload.args+=[\"--component\", \"$component\"]"`
 
 basic_json=`echo $basic_json | jq ".cluster_workload.args+=$other_args | .cluster_request.name=\"$component-bench\" | .cluster_workload.args+=$cargs"`
-basic_json=`echo $basic_json | jq ".cluster_workload.args+=[\"--workload-storage\", \"s3://brie/$workload?access-key=YOURACCESSKEY&secret-access-key=YOURSECRETKEY&endpoint=http://172.16.4.4:30812\"]"`
+basic_json=`echo $basic_json | jq ".cluster_workload.args+=[\"--workload-storage\", \"s3://brie/$workload?access-key=YOURACCESSKEY&secret-access-key=YOURSECRETKEY&endpoint=http://172.16.4.4:30812&force-path-style=true\"]"`
 if [ $component = "dumpling" ]; then
   basic_json=`echo $basic_json | jq ".cluster_workload.restore_path=\"mybucket/$workload\""`
 fi

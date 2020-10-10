@@ -6,6 +6,7 @@ import (
 	"github.com/yujuncen/brie-bench/workload/utils"
 	"github.com/yujuncen/brie-bench/workload/utils/git"
 	"go.uber.org/zap"
+	"os"
 	"path"
 	"reflect"
 	"strings"
@@ -14,7 +15,7 @@ import (
 type Lightning struct{}
 
 func (l Lightning) DefaultRepo() string {
-	return "github.com/"
+	return "https://github.com/pingcap/lightning.git"
 }
 
 type LightningBin struct {
@@ -73,15 +74,29 @@ func (l *LightningBin) ImportLocal(opts LightningOpts) error {
 	if err != nil {
 		return err
 	}
+
 	cliOpts := make([]string, 0)
+	conf, err := NewLightningConfigFile()
+	if err != nil {
+		return nil
+	}
+	if err := NewLightningConf().To(conf.IO); err != nil {
+		return err
+	}
+	if err := NewLocalBackendConf(path.Join(os.TempDir(), "local-sorting")).To(conf.IO); err != nil {
+		return err
+	}
+
 	cliOpts = append(cliOpts, []string{
-		"--backend", "tidb",
+		"--backend", "local",
 		"--tidb-host", addr,
 		"--tidb-port", port,
 		"--pd-urls", opts.Cluster.PdAddr,
 		"-d", opts.Workload.Source,
 		"--log-file", path.Join(config.Artifacts, "tidb.log"),
+		"--config", conf.WriteToDisk(),
 	}...)
+
 	cliOpts = append(cliOpts, opts.Extra...)
 	cmd := utils.NewCommand(l.binary, cliOpts...)
 	return utils.Bench("import with local backend", cmd.Run)
@@ -94,7 +109,7 @@ func (l *LightningBin) ImportTiDB(opts LightningOpts) error {
 	}
 	cliOpts := make([]string, 0)
 	cliOpts = append(cliOpts, []string{
-		"--backend", "local",
+		"--backend", "tidb",
 		"--tidb-host", addr,
 		"--tidb-port", port,
 		"--pd-urls", opts.Cluster.PdAddr,
