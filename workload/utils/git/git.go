@@ -52,6 +52,6 @@ func (r *Repo) ResetHard(hash string) error {
 // Make run the `make` command in the local repository.
 func (r *Repo) Make(targets ...string) error {
 	return utils.NewCommand("make", targets...).
-		Opt(utils.SystemOutput, utils.WorkDir(r.local)).
+		Opt(utils.WorkDir(r.local)).
 		Run()
 }

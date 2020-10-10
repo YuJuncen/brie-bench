@@ -23,6 +23,7 @@ func NewCommand(path string, args ...string) *Command {
 	return &Command{path: path, args: args, beforeRun: func(cmd *exec.Cmd) {}}
 }
 
+// Opt apply command options to the command.
 func (command *Command) Opt(opts ...CommandOpt) *Command {
 	oldOpts := command.beforeRun
 	command.beforeRun = func(cmd *exec.Cmd) {
@@ -34,12 +35,14 @@ func (command *Command) Opt(opts ...CommandOpt) *Command {
 	return command
 }
 
+// WorkDir sets the workdir of the command.
 func WorkDir(dir string) CommandOpt {
 	return func(command *exec.Cmd) {
 		command.Dir = dir
 	}
 }
 
+// Redirect equals `command 2>&1 >$dir`
 func RedirectTo(dir string) CommandOpt {
 	return func(command *exec.Cmd) {
 		file, err := os.Create(dir)
@@ -50,10 +53,12 @@ func RedirectTo(dir string) CommandOpt {
 }
 
 var (
+	// DropOutput drops the output of the command (Default).
 	DropOutput CommandOpt = func(command *exec.Cmd) {
 		command.Stdout = NOPIO
 		command.Stderr = NOPIO
 	}
+	// SystemOutput redirect the output to stdin / stdout.
 	SystemOutput CommandOpt = func(command *exec.Cmd) {
 		command.Stdout = os.Stdout
 		command.Stderr = os.Stderr
