@@ -15,6 +15,7 @@ if [ ! $component ]; then
     fail "must provide a component name"
 fi
 
+workload_bucket=brie
 log component = $component
 log hash = ${hash-"default"}
 log workload = ${workload:="tpcc1000"}
@@ -45,10 +46,10 @@ basic_json=`echo $basic_json | jq ".cluster_workload.args+=$other_args | .cluste
 if [ ! ${workload_storage-""} ]; then
   basic_json=`echo $basic_json | \
   jq ".cluster_workload.args+=[\"--workload-storage\", \
-    \"s3://brie/$workload?access-key=YOURACCESSKEY&secret-access-key=YOURSECRETKEY&endpoint=172.16.4.4:30812&force-path-style=true\"]"`
+    \"s3://$workload_bucket/$workload?access-key=YOURACCESSKEY&secret-access-key=YOURSECRETKEY&endpoint=172.16.4.4:30812&force-path-style=true\"]"`
 fi
 if [ $component = "dumpling" ]; then
-  basic_json=`echo $basic_json | jq ".cluster_workload.restore_path=\"mybucket/$workload\""`
+  basic_json=`echo $basic_json | jq ".cluster_workload.restore_path=\"$workload_bucket/$workload\""`
 fi
 
 log running with request

@@ -3,9 +3,8 @@ ENV GO111MODULE=on
 ENV GOPROXY=https://goproxy.io,direct
 
 WORKDIR /brie
-COPY ./workload .
-
-RUN go build -o bin/run
+COPY . .
+RUN go build -o bin/run workload/main.go
 
 FROM golang:1.14-alpine
 WORKDIR /brie
