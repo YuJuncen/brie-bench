@@ -23,7 +23,7 @@ func ConnectToS3(url string) (*TempS3Storage, error) {
 	}
 	s3Opts := backend.GetS3()
 	log.Info("use temporary S3 storage", zap.Any("config", s3Opts), zap.String("url", url))
-	minioClient, err := minio.New(strings.TrimPrefix(s3Opts.Endpoint, "https://"), s3Opts.AccessKey, s3Opts.SecretAccessKey, false)
+	minioClient, err := minio.New(strings.TrimPrefix(s3Opts.Endpoint, "http://"), s3Opts.AccessKey, s3Opts.SecretAccessKey, false)
 	if err != nil {
 		return nil, err
 	}

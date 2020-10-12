@@ -23,7 +23,10 @@ show_info() {
 
 get_metrics() {
       grafana_ip=$(curl -s 172.16.5.110:8000/api/cluster/resource/$cluster_id | jq -r '.[] | {"components": .components, "ip": .ip} | select(.components | contains("grafana")) | .ip')
-      log "you can view the grafana in $grafana_ip:3000"
+      if [ ! $grafana_ip ]; then
+        fail "cannot find any metrics"
+      fi
+      log "you can view the grafana in http://$grafana_ip:3000"
 }
 
 case ${1-"info"} in
