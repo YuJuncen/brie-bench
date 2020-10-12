@@ -16,6 +16,11 @@ then the API server would create a cluster and run the workload.
 The server would response with a `cluster_id`, which can be used 
 by other utils then.
 
+### requirement
+
+The binaries in `/bin` requires [`mc`](https://github.com/minio/mc) (to connect to minio) and `jq` (to create and edit json).
+
+
 ### binaries (WIP)
 
 - `get_file [cluster_id] [filename]`: Get the output file of the test from the `minio` s3 endpoint. 
@@ -31,7 +36,8 @@ The cluster ID can be absent, and then you can select one from recent requests.
 For now, `BR` and `Dumpling` are supported component. Below lists other command line parameters.
 
 - `--hash`: The commit hash of the component.
-- `--workload`: The workload to run.
+- `--workload-name`: The workload to run.
+- `--workload-storage`: The storage for workload.
 - `--repo`: The repository the component built from.
 - `--`: All flags after this would be passed to the component directly, aware this might be overridden by the framework.  
  

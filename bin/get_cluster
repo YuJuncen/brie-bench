@@ -6,13 +6,38 @@ if ! source bin/utils.sh; then
     echo "failed to load the utils package. make sure bin/utils.sh exists"
     exit 1
 fi
+
 cluster_id=${1-$(get_cluster)}
 if [ $cluster_id = '.' ]; then
   cluster_id=`get_last_cluster`
 fi
+shift
 
-log "cluster info"
-curl -s 172.16.5.110:8000/api/cluster/$cluster_id | jq
+show_info() {
+    log "cluster info"
+    curl -s 172.16.5.110:8000/api/cluster/$cluster_id | jq
 
-log "cluster resource"
-curl -s 172.16.5.110:8000/api/cluster/resource/$cluster_id | jq '.[] | {"components": .components, "ip": .ip} | select(.components != "")'
+    log "cluster resource"
+    curl -s 172.16.5.110:8000/api/cluster/resource/$cluster_id | jq '.[] | {"components": .components, "ip": .ip} | select(.components != "")'
+}
+
+get_metrics() {
+      grafana_ip=$(curl -s 172.16.5.110:8000/api/cluster/resource/$cluster_id | jq -r '.[] | {"components": .components, "ip": .ip} | select(.components | contains("grafana")) | .ip')
+      log "you can view the grafana in $grafana_ip:3000"
+}
+
+case ${1-"info"} in
+info )
+  show_info
+  shift
+  ;;
+metrics)
+  get_metrics
+  shift
+  ;;
+*)
+  show_info
+  shift
+  ;;
+esac
+

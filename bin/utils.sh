@@ -43,6 +43,12 @@ parse_args() {
         shift
         shift
         ;;
+    --workload-storage )
+        export workload_storage=$2
+        other_args=`echo $other_args | jq ". += [\"$1\", \"$2\"]"`
+        shift
+        shift
+        ;;
     -- )
         shift
         while [[ $# -gt 0 ]]; do
