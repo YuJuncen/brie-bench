@@ -10,15 +10,6 @@ This repository contains the workload and some utils to run those cases.
 bin/exec component [--dry-run] [args passing to main.go...] [-- [args passing to the component...]] 
 ```
 
-### Task info
-| <!-- -->    | <!-- -->    |
-| ---- | ---- |
-| component    |                            check |
-| hash         |                                  |
-| repository   |                                  |
-| workload     |                          testing |
-
-
 This command will make request to the default API server(172.16.5.110:8000), 
 then the API server would create a cluster and run the workload. 
 
