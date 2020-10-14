@@ -7,7 +7,6 @@ import (
 	"github.com/yujuncen/brie-bench/workload/config"
 	"github.com/yujuncen/brie-bench/workload/utils"
 	"github.com/yujuncen/brie-bench/workload/utils/git"
-	"github.com/yujuncen/brie-bench/workload/utils/metric"
 	"github.com/yujuncen/brie-bench/workload/utils/storage"
 	"go.uber.org/zap"
 	"path"
@@ -30,7 +29,8 @@ type BRBin struct {
 	binary string
 }
 
-func (br BRBin) MakeOptionsWith(conf config.Config, cluster *utils.Cluster) interface{} {
+func (br BRBin) MakeOptionsWith(cluster *utils.BenchContext) interface{} {
+	conf := cluster.Config
 	opt := BROption{
 		Workload: BRWorkload{
 			Name:              conf.Workload,
@@ -59,7 +59,7 @@ type BRWorkload struct {
 type BRRunType int
 
 type BROption struct {
-	Cluster     *utils.Cluster
+	Cluster     *utils.BenchContext
 	LogDir      string
 	Workload    BRWorkload
 	UseDebugLog bool
@@ -81,7 +81,7 @@ func (br BRBin) Restore(opt BROption) error {
 	restoreCliOpts = append(restoreCliOpts, opt.Extra...)
 	restore := utils.NewCommand(br.binary, restoreCliOpts...)
 	restore.Opt(utils.DropOutput)
-	return metric.Bench(fmt.Sprintf("restore %s", opt.Workload.Name), restore.Run)
+	return opt.Cluster.Report.Bench(fmt.Sprintf("restore %s", opt.Workload.Name), restore.Run)
 }
 
 func (br BRBin) Backup(opt BROption, storage *storage.TempS3Storage) error {
@@ -102,7 +102,7 @@ func (br BRBin) Backup(opt BROption, storage *storage.TempS3Storage) error {
 	backupCliOpts = append(backupCliOpts, opt.Extra...)
 	backup := utils.NewCommand(br.binary, backupCliOpts...)
 	backup.Opt(utils.DropOutput)
-	return metric.Bench(fmt.Sprintf("backup %s", opt.Workload.Name), backup.Run)
+	return opt.Cluster.Report.Bench(fmt.Sprintf("backup %s", opt.Workload.Name), backup.Run)
 }
 
 func (br BRBin) Run(opts interface{}) error {

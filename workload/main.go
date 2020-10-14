@@ -1,17 +1,21 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
 	"errors"
 	"github.com/pingcap/log"
 	components "github.com/yujuncen/brie-bench/workload/components"
 	"github.com/yujuncen/brie-bench/workload/config"
 	"github.com/yujuncen/brie-bench/workload/utils"
+	"github.com/yujuncen/brie-bench/workload/utils/metric"
 	"github.com/yujuncen/brie-bench/workload/utils/pd"
 	"go.uber.org/zap"
+	"os"
 	"time"
 )
 
-func startComponent(component components.Component, cluster *utils.Cluster, conf config.Config) error {
+func startComponent(component components.Component, cluster *utils.BenchContext, conf config.Config) error {
 	buildOpts := components.BuildOptions{
 		Hash:       conf.Hash,
 		Repository: conf.Repo,
@@ -30,13 +34,39 @@ func startComponent(component components.Component, cluster *utils.Cluster, conf
 	if err != nil {
 		return err
 	}
-	runOpts := bin.MakeOptionsWith(conf, cluster)
+	runOpts := bin.MakeOptionsWith(cluster)
 	log.Info("Run with options", zap.Any("options", runOpts), zap.Duration("build-time-cost", time.Since(start)))
 	runStart := time.Now()
 	if err := bin.Run(runOpts); err != nil {
 		return err
 	}
 	log.Info("Run ended", zap.Duration("run-time-cost", time.Since(runStart)))
+
+	reportFile, err := os.Create(config.Report)
+	if err != nil {
+		return err
+	}
+	if report != nil && report.Data != "" {
+		var lastReport metric.Report
+		if err := json.Unmarshal([]byte(report.Data), &lastReport); err != nil {
+			return err
+		}
+		if err := cluster.Report.ExportComparing(reportFile, &lastReport); err != nil {
+			return err
+		}
+	} else {
+		jsonReport, err := json.Marshal(cluster.Report)
+		if err != nil {
+			return err
+		}
+		textualReport := bytes.NewBuffer(nil)
+		if err := cluster.Report.Export(textualReport); err != nil {
+			return err
+		}
+		if err := cluster.SendReport(string(jsonReport), textualReport.String()); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -58,7 +88,7 @@ func main() {
 	config.Init()
 	log.Info("run with", zap.Any("config", config.C))
 
-	cluster := utils.NewCluster()
+	cluster := utils.NewCluster(config.C)
 	if err := utils.DumpCluster(cluster); err != nil {
 		log.Warn("failed to dump cluster info", zap.Error(err))
 	}
@@ -71,5 +101,4 @@ func main() {
 		utils.Must(pd.DefaultClient.EnableScheduler([]string{cluster.PdAddr}, pd.Schedulers...))
 	}
 	utils.Must(startComponent(component, cluster, config.C))
-
 }

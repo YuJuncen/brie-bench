@@ -4,7 +4,9 @@ ENV GOPROXY=https://goproxy.io,direct
 
 WORKDIR /brie
 COPY . .
-RUN go build -o bin/run workload/main.go
+RUN apk add --no-cache \
+    make
+RUN make workload-image
 
 FROM golang:1.14-alpine
 WORKDIR /brie

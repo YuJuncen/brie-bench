@@ -5,7 +5,6 @@ import (
 	"github.com/yujuncen/brie-bench/workload/config"
 	"github.com/yujuncen/brie-bench/workload/utils"
 	"github.com/yujuncen/brie-bench/workload/utils/git"
-	"github.com/yujuncen/brie-bench/workload/utils/metric"
 	"go.uber.org/zap"
 	"os"
 	"path"
@@ -27,7 +26,8 @@ func NewLightning() Component {
 	return Lightning{}
 }
 
-func (l *LightningBin) MakeOptionsWith(conf config.Config, cluster *utils.Cluster) interface{} {
+func (l *LightningBin) MakeOptionsWith(cluster *utils.BenchContext) interface{} {
+	conf := cluster.Config
 	var backend LightningBackend
 	switch strings.ToLower(conf.Lightning.Backend) {
 	case "local":
@@ -66,7 +66,7 @@ type LightningOpts struct {
 	Workload LightningWorkload
 	Misc     config.Lightning
 
-	Cluster *utils.Cluster
+	Cluster *utils.BenchContext
 
 	Extra []string
 }
@@ -103,7 +103,7 @@ func (l *LightningBin) ImportLocal(opts LightningOpts) error {
 
 	cliOpts = append(cliOpts, opts.Extra...)
 	cmd := utils.NewCommand(l.binary, cliOpts...)
-	return metric.Bench("import with local backend", cmd.Run)
+	return opts.Cluster.Report.Bench("import with local backend", cmd.Run)
 }
 
 func (l *LightningBin) ImportTiDB(opts LightningOpts) error {
@@ -130,7 +130,7 @@ func (l *LightningBin) ImportTiDB(opts LightningOpts) error {
 	}...)
 	cliOpts = append(cliOpts, opts.Extra...)
 	cmd := utils.NewCommand(l.binary, cliOpts...)
-	return metric.Bench("import with TiDB backend", cmd.Run)
+	return opts.Cluster.Report.Bench("import with TiDB backend", cmd.Run)
 }
 
 func (l *LightningBin) Run(opts interface{}) error {

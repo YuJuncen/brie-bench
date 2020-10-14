@@ -1,7 +1,6 @@
 package component
 
 import (
-	"github.com/yujuncen/brie-bench/workload/config"
 	"github.com/yujuncen/brie-bench/workload/utils"
 )
 
@@ -24,5 +23,5 @@ type Binary interface {
 	// Run runs the component with specified option. The type of option should as same as MakeOptionsWith returns.
 	Run(opts interface{}) error
 	// MakeOptionsWith extract config value this component needs.
-	MakeOptionsWith(conf config.Config, cluster *utils.Cluster) interface{}
+	MakeOptionsWith(cluster *utils.BenchContext) interface{}
 }

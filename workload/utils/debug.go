@@ -20,26 +20,7 @@ API server address: %20s
 `
 )
 
-var iecUnits = []string{"", "K", "M", "G", "T", "P"}
-
-// ToIce convert a size to iec format("xxxM")
-func ToIec(num int64) string {
-	unitIdx := 0
-	floatNum := float64(num)
-	for floatNum > 1024 && unitIdx < len(iecUnits)-1 {
-		floatNum = floatNum / 1024
-		unitIdx += 1
-	}
-	return fmt.Sprintf("%.1f%s", floatNum, iecUnits[unitIdx])
-}
-
-type Size uint64
-
-func (s Size) String() string {
-	return ToIec(int64(s))
-}
-
-func DumpCluster(c *Cluster) error {
+func DumpCluster(c *BenchContext) error {
 	file, err := os.Create(path.Join(config.Artifacts, ClusterInfoFile))
 	if err != nil {
 		return err

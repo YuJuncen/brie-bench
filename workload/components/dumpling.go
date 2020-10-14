@@ -44,7 +44,8 @@ type DumplingBin struct {
 	binary string
 }
 
-func (d *DumplingBin) MakeOptionsWith(conf config.Config, cluster *utils.Cluster) interface{} {
+func (d *DumplingBin) MakeOptionsWith(cluster *utils.BenchContext) interface{} {
+	conf := cluster.Config
 	return DumplingOpts{
 		TargetDir: "/tmp/dumped",
 		LogPath:   config.Artifacts,
@@ -72,14 +73,14 @@ func (d *DumplingBin) Dump(opt DumplingOpts, fileType string) error {
 	binOpts = append(binOpts, opt.Extra...)
 	cmd := utils.NewCommand(d.binary, binOpts...).
 		Opt(utils.RedirectTo(path.Join(opt.LogPath, "dumpling.log")))
-	if err := metric.Bench("dump to "+fileType, cmd.Run); err != nil {
+	if err := opt.Cluster.Report.Bench("dump to "+fileType, cmd.Run); err != nil {
 		return err
 	}
 	if err := filepath.Walk(opt.TargetDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		log.Info("file dumped", zap.String("name", info.Name()), zap.Stringer("size", utils.Size(info.Size())))
+		log.Info("file dumped", zap.String("name", info.Name()), zap.Stringer("size", metric.SizeStringer(info.Size())))
 		return nil
 	}); err != nil {
 		return err
@@ -125,7 +126,7 @@ type DumplingOpts struct {
 	SkipSQL   bool
 	SkipCSV   bool
 
-	Cluster *utils.Cluster
+	Cluster *utils.BenchContext
 
 	Extra []string
 }
