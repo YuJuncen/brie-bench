@@ -33,6 +33,11 @@ parse_args() {
     export cargs="[]"
     while [[ $# -gt 0 ]]; do
     case $1 in
+    --import-to)
+      export import_to=$2
+      shift
+      shift
+      ;;
     --dry-run )
         export dry_run=1
         shift

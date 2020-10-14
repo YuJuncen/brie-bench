@@ -6,6 +6,7 @@ import (
 	"github.com/yujuncen/brie-bench/workload/config"
 	"github.com/yujuncen/brie-bench/workload/utils"
 	"github.com/yujuncen/brie-bench/workload/utils/git"
+	"github.com/yujuncen/brie-bench/workload/utils/metric"
 	"go.uber.org/zap"
 	"os"
 	"path"
@@ -71,7 +72,7 @@ func (d *DumplingBin) Dump(opt DumplingOpts, fileType string) error {
 	binOpts = append(binOpts, opt.Extra...)
 	cmd := utils.NewCommand(d.binary, binOpts...).
 		Opt(utils.RedirectTo(path.Join(opt.LogPath, "dumpling.log")))
-	if err := utils.Bench("dump to "+fileType, cmd.Run); err != nil {
+	if err := metric.Bench("dump to "+fileType, cmd.Run); err != nil {
 		return err
 	}
 	if err := filepath.Walk(opt.TargetDir, func(path string, info os.FileInfo, err error) error {

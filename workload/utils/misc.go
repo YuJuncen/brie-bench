@@ -3,10 +3,8 @@ package utils
 import (
 	"errors"
 	"fmt"
-	"github.com/pingcap/log"
 	"go.uber.org/zap"
 	"strings"
-	"time"
 )
 
 var NOPIO = NIO{}
@@ -31,11 +29,13 @@ func HostAndPort(addr string) (host string, port string, err error) {
 	return
 }
 
-// Bench runs the task, with logging the time cost.
-func Bench(name string, task func() error) error {
-	start := time.Now()
-	defer func() {
-		log.Info("bench task done", zap.String("name", name), zap.Duration("cost", time.Since(start)))
-	}()
-	return task()
+type shortError struct{ error }
+
+func (e shortError) String() string {
+	return e.Error()
+}
+
+// ShortError prints a short error message.
+func ShortError(err error) zap.Field {
+	return zap.Stringer("error", shortError{err})
 }

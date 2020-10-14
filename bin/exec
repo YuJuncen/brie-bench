@@ -32,7 +32,7 @@ basic_json=`echo '{
         {"component": "grafana", "deploy_path": "/data1", "rri_item_id": 1}
     ],
     "cluster_workload": {        
-        "type": "standard",               
+        "type": "standard",
         "docker_image": "lovecsust/brie-bench:latest",
         "cmd": "bin/run",
         "args": [],
@@ -42,11 +42,14 @@ basic_json=`echo '{
     }
 }' | jq ".cluster_workload.args+=[\"--component\", \"$component\"]"`
 
+if [ ${import_to-""} ]; then
+  basic_json=`echo $basic_json | jq ".cluster_workload.type=\"importer\" | .cluster_workload.backup_path=\"$workload_bucket/$import_to\""`
+fi
 basic_json=`echo $basic_json | jq ".cluster_workload.args+=$other_args | .cluster_request.name=\"$component-bench\" | .cluster_workload.args+=$cargs"`
 if [ ! ${workload_storage-""} ]; then
   basic_json=`echo $basic_json | \
   jq ".cluster_workload.args+=[\"--workload-storage\", \
-    \"s3://$workload_bucket/$workload?access-key=YOURACCESSKEY&secret-access-key=YOURSECRETKEY&endpoint=172.16.4.4:30812&force-path-style=true\"]"`
+    \"s3://$workload_bucket/$workload?access-key=YOURACCESSKEY&secret-access-key=YOURSECRETKEY&endpoint=http://172.16.4.4:30812&force-path-style=true\"]"`
 fi
 if [ $component = "dumpling" ]; then
   basic_json=`echo $basic_json | jq ".cluster_workload.restore_path=\"$workload_bucket/$workload\""`
@@ -57,7 +60,10 @@ log $basic_json
 
 if [ ! ${dry_run-""} ]; then
   log requesting...
-  cluster_id=$(curl -# 172.16.5.110:8000/api/cluster/test -XPOST -d "$basic_json" | jq ".cluster_request_id")
+  cluster_id=$(curl -s 172.16.5.110:8000/api/cluster/test -XPOST -d "$basic_json" | jq ".cluster_request_id")
+  if [ ! $cluster_id ]; then
+    fail "failed to request."
+  fi
   add_cluster $cluster_id
   log request success, cluster ID: $cluster_id
 fi

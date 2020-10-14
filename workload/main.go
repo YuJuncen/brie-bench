@@ -16,7 +16,12 @@ func startComponent(component components.Component, cluster *utils.Cluster, conf
 		Hash:       conf.Hash,
 		Repository: conf.Repo,
 	}
-	if buildOpts.Repository == "" {
+	report, err := cluster.GetLastReport()
+	if err != nil {
+		log.Warn("failed to get last report, assuming std test case", utils.ShortError(err))
+		err = nil
+	}
+	if buildOpts.Repository == "" || (report != nil && report.Data != "") {
 		buildOpts.Repository = component.DefaultRepo()
 	}
 	start := time.Now()
@@ -66,4 +71,5 @@ func main() {
 		utils.Must(pd.DefaultClient.EnableScheduler([]string{cluster.PdAddr}, pd.Schedulers...))
 	}
 	utils.Must(startComponent(component, cluster, config.C))
+
 }

@@ -5,6 +5,7 @@ import (
 	"github.com/yujuncen/brie-bench/workload/config"
 	"github.com/yujuncen/brie-bench/workload/utils"
 	"github.com/yujuncen/brie-bench/workload/utils/git"
+	"github.com/yujuncen/brie-bench/workload/utils/metric"
 	"go.uber.org/zap"
 	"os"
 	"path"
@@ -96,13 +97,13 @@ func (l *LightningBin) ImportLocal(opts LightningOpts) error {
 		"--tidb-port", port,
 		"--pd-urls", opts.Cluster.PdAddr,
 		"-d", opts.Workload.Source,
-		"--log-file", path.Join(config.Artifacts, "tidb.log"),
+		"--log-file", path.Join(config.Artifacts, "local.log"),
 		"--config", conf.WriteToDisk(),
 	}...)
 
 	cliOpts = append(cliOpts, opts.Extra...)
 	cmd := utils.NewCommand(l.binary, cliOpts...)
-	return utils.Bench("import with local backend", cmd.Run)
+	return metric.Bench("import with local backend", cmd.Run)
 }
 
 func (l *LightningBin) ImportTiDB(opts LightningOpts) error {
@@ -124,12 +125,12 @@ func (l *LightningBin) ImportTiDB(opts LightningOpts) error {
 		"--tidb-port", port,
 		"--pd-urls", opts.Cluster.PdAddr,
 		"-d", opts.Workload.Source,
-		"--log-file", path.Join(config.Artifacts, "local.log"),
+		"--log-file", path.Join(config.Artifacts, "tidb.log"),
 		"--config", conf.WriteToDisk(),
 	}...)
 	cliOpts = append(cliOpts, opts.Extra...)
 	cmd := utils.NewCommand(l.binary, cliOpts...)
-	return utils.Bench("import with TiDB backend", cmd.Run)
+	return metric.Bench("import with TiDB backend", cmd.Run)
 }
 
 func (l *LightningBin) Run(opts interface{}) error {

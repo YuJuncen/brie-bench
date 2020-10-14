@@ -6,6 +6,7 @@ require (
 	github.com/go-ini/ini v1.62.0 // indirect
 	github.com/minio/minio-go v6.0.14+incompatible
 	github.com/pingcap/br v0.0.0-20201009140310-ed2b14378e3f
+	github.com/pingcap/check v0.0.0-20200212061837-5e12011dc712
 	github.com/pingcap/errors v0.11.5-0.20200917111840-a15ef68f753d
 	github.com/pingcap/kvproto v0.0.0-20200927054727-1290113160f0
 	github.com/pingcap/log v0.0.0-20200828042413-fce0951f1463
