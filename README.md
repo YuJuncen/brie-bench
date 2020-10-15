@@ -25,7 +25,7 @@ The binaries in `/bin` requires [`mc`](https://github.com/minio/mc) (to connect 
 
 - `get_file [cluster_id] [filename]`: Get the output file of the test from the `minio` s3 endpoint. 
 (Need run `mc alias set minio http://172.16.4.18:30812 YOURACCESSKEY YOURSECRETKEY` firstly for the default API server).
-- `get_cluster [cluster_id]`: Get the cluster info.
+- `get_cluster [cluster_id] [(info|metrics)]`: Get the cluster info, or grafana address.
 - `rebuild_metrics [cluster_id]`: Rebuild the grafana metrics. (WIP)
 
 The cluster ID can be a dot(`.`), which means get the last requested cluster.  
@@ -48,6 +48,9 @@ BR backup, CSV or SQL files.
 
 Each component should do several cases (steps) with this workload, as described below.
 
+The `input` could be specified by `--workload-storage` directly, or just provide `--workload-name` to let the framework
+deriving where the workload is.
+
 #### BR
 
 Input: a BR backup instance.
@@ -65,7 +68,9 @@ Input: a BR backup instance.
 
 #### Lightning
 
-Input: a Folder of CSV or SQL, and which backend to use (can be specified by `--lightning.backend`).
+When testing tidb-lightning, you should provide which backend (local or TiDB) to use by `--lightning.backend`.
+
+Input: a Folder of CSV or SQL.
 
 1. Lightning will run that case.
 

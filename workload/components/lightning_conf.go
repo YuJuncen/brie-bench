@@ -2,12 +2,13 @@ package component
 
 import (
 	"fmt"
-	"github.com/pingcap/log"
-	"github.com/yujuncen/brie-bench/workload/config"
-	"go.uber.org/zap"
 	"io"
 	"os"
 	"path"
+
+	"github.com/pingcap/log"
+	"github.com/yujuncen/brie-bench/workload/config"
+	"go.uber.org/zap"
 )
 
 const (
@@ -16,11 +17,6 @@ check-requirements = false
 index-concurrency = %d
 table-concurrency = %d
 IO-concurrency = %d
-
-[metric]
-job = "tikv-importer"
-interval = "15s"
-address = "%s"
 `
 	local = `[tikv-importer]
 backend = "local"
@@ -48,7 +44,7 @@ func NewLightningConf() *LightningConf {
 }
 
 func (conf *LightningConf) To(w io.Writer) error {
-	_, err := fmt.Fprintf(w, basic, conf.IndexConcurrency, conf.TableConcurrency, conf.IOConcurrency, conf.PromAddress)
+	_, err := fmt.Fprintf(w, basic, conf.IndexConcurrency, conf.TableConcurrency, conf.IOConcurrency)
 	return err
 }
 
