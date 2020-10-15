@@ -4,6 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"io"
+	"os"
+	"time"
+
 	"github.com/pingcap/log"
 	components "github.com/yujuncen/brie-bench/workload/components"
 	"github.com/yujuncen/brie-bench/workload/config"
@@ -11,8 +15,6 @@ import (
 	"github.com/yujuncen/brie-bench/workload/utils/metric"
 	"github.com/yujuncen/brie-bench/workload/utils/pd"
 	"go.uber.org/zap"
-	"os"
-	"time"
 )
 
 func startComponent(component components.Component, cluster *utils.BenchContext, conf config.Config) error {
@@ -65,7 +67,7 @@ func saveAndUploadReport(cluster *utils.BenchContext, report *utils.WorkloadRepo
 			return err
 		}
 		textualReport := bytes.NewBuffer(nil)
-		if err := cluster.Report.Export(textualReport); err != nil {
+		if err := cluster.Report.Export(io.MultiWriter(textualReport, reportFile)); err != nil {
 			return err
 		}
 		if err := cluster.SendReport(string(jsonReport), textualReport.String()); err != nil {
