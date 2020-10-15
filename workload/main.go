@@ -25,7 +25,7 @@ func startComponent(component components.Component, cluster *utils.BenchContext,
 		log.Warn("failed to get last report, assuming std test case", utils.ShortError(err))
 		err = nil
 	}
-	if buildOpts.Repository == "" || (report != nil && report.Data != "") {
+	if buildOpts.Repository == "" || (report != nil && report.Data != "") /* when in PR benching mode */ {
 		buildOpts.Repository = component.DefaultRepo()
 	}
 	start := time.Now()
@@ -42,10 +42,15 @@ func startComponent(component components.Component, cluster *utils.BenchContext,
 	}
 	log.Info("Run ended", zap.Duration("run-time-cost", time.Since(runStart)))
 
+	return saveAndUploadReport(cluster, report)
+}
+
+func saveAndUploadReport(cluster *utils.BenchContext, report *utils.WorkloadReport) error {
 	reportFile, err := os.Create(config.Report)
 	if err != nil {
 		return err
 	}
+	defer func() { _ = reportFile.Close() }()
 	if report != nil && report.Data != "" {
 		var lastReport metric.Report
 		if err := json.Unmarshal([]byte(report.Data), &lastReport); err != nil {

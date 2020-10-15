@@ -16,6 +16,11 @@ check-requirements = false
 index-concurrency = %d
 table-concurrency = %d
 IO-concurrency = %d
+
+[metric]
+job = "tikv-importer"
+interval = "15s"
+address = "%s"
 `
 	local = `[tikv-importer]
 backend = "local"
@@ -30,6 +35,8 @@ type LightningConf struct {
 	IndexConcurrency uint
 	TableConcurrency uint
 	IOConcurrency    uint
+
+	PromAddress string
 }
 
 func NewLightningConf() *LightningConf {
@@ -41,7 +48,7 @@ func NewLightningConf() *LightningConf {
 }
 
 func (conf *LightningConf) To(w io.Writer) error {
-	_, err := fmt.Fprintf(w, basic, conf.IndexConcurrency, conf.TableConcurrency, conf.IOConcurrency)
+	_, err := fmt.Fprintf(w, basic, conf.IndexConcurrency, conf.TableConcurrency, conf.IOConcurrency, conf.PromAddress)
 	return err
 }
 
@@ -100,6 +107,9 @@ func (conf *LightningConf) FillBy(c *LightningOpts) *LightningConf {
 	}
 	if c.Misc.IOConcurrency != 0 {
 		conf.IOConcurrency = c.Misc.IOConcurrency
+	}
+	if c.Cluster.PrometheusAddr != "" {
+		conf.PromAddress = c.Cluster.PrometheusAddr
 	}
 	return conf
 }
