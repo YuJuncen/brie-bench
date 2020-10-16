@@ -2,3 +2,7 @@ debugging
 workload/bin
 .idea
 .brie_bench_last_cluster
+venv
+__pycache__/
+*.py[cod]
+*$py.class

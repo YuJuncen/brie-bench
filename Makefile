@@ -1,6 +1,5 @@
 all: workload ctl
 
-CLEAN := echo clean
 
 docker-bulid:
 	docker build --tag lovecsust/brie-bench .
@@ -8,5 +7,10 @@ docker-bulid:
 workload-image:
 	go build -o bin/run workload/main.go
 
-ctl:
-	echo "ctl isn't ready yet, exiting :(" && exit 1
+venv-prepare:
+	python3 -m venv ctl/venv
+
+ctl-build: venv-prepare
+	$(VENV_ENABLE)
+	pip install -r ctl/requirements.txt
+	
