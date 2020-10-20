@@ -1,0 +1,4 @@
+#! /bin/bash
+
+source ctl/venv/bin/activate
+python3 ctl/main.py $@

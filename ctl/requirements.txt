@@ -2,3 +2,4 @@ minio==6.0.0
 requests==2.12.5
 recordclass==0.14.3
 coloredlogs==14.0
+colorama==0.4.4

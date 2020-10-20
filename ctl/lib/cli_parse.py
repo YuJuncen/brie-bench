@@ -1,4 +1,4 @@
-from typing import Iterable, List, NamedTuple
+from typing import Any, Callable, Iterable, List, NamedTuple, TypeVar
 from recordclass import recordclass
 import logging
 import sys
@@ -42,7 +42,8 @@ CLIConfig = recordclass("CLIConfig", [
 
 def shift() -> str:
     """
-    shift shifts the current argv. Like `shift` command in bash.
+    shift shifts the current argv and return the first value. 
+    Like `shift` command in bash.
     """
     try:
         return sys.argv.pop(0)
@@ -91,19 +92,54 @@ def parse_cli(argv: List[str], conf : CLIConfig = None) -> CLIConfig:
         else:
             conf.other_args.append(tag)
     return conf
-        
+
+NOT_AN_NUMBER = "NAN"
+USER_ABORT = "UAB"
 def read_int():
+    """
+    read_int reads a integer from stdin,
+    returns NOT_A_NUMBER if input cannot be parsed as int,
+    returns USER_ABORT if user aborts.
+    """
     try:
         return int(input())
+    except EOFError:
+        return USER_ABORT
+    except KeyboardInterrupt:
+        return USER_ABORT
     except:
-        return None
+        return NOT_AN_NUMBER
 
-def select(items: Iterable[str]) -> str:
+T = TypeVar('T')
+def select(items: Iterable[T], mapper : Callable[[T], str] = lambda x: x) -> str:
+    """
+    select prompts user to select one item in the items.
+    mapper maps the items to a printable string.
+    """
     for i, item in enumerate(items):
-        print(f"{i}) {item}")
-    print("#? ")
+        print(f"{i}) {mapper(item)}")
+    print("#? ", end='')
     choice = read_int()
-    while choice is None or choice >= len(items):
-        print("(please, input a number in list)#? ")
+    while choice is NOT_AN_NUMBER or choice >= len(items):
+        if choice is USER_ABORT:
+            print("(aborted)")
+            exit(0)
+        print("(please, input a number in list)#? ", end='')
         choice = read_int()
     return items[choice]
+
+def prompt_ok(prompt: str, default: bool = True) -> bool:
+    """
+    prompt_ok prompts the user for a boolean value.
+    """
+    hint = "[Y/n]" if default else "[y/N]"
+    i = input(f"{prompt} {hint} ")
+    if i.lower() == 'y':
+        return True
+    if i.lower() == 'n':
+        return False
+    if i == '':
+        return default
+    
+    print("(please input y or n) ")
+    return prompt_ok(prompt, default)

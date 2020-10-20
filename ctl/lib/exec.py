@@ -1,3 +1,4 @@
+from .saved_clusters import save_request_id
 import requests
 import json
 import logging
@@ -97,7 +98,10 @@ class ClusterRequest:
                 resp = requests.post(f"http://{self.config.api_server}/api/cluster/test", json=self.data)
                 if resp.status_code / 100 != 2:
                     logging.error(f"failed to request: got response with failed message {resp}: {resp.content}")
-                logging.info(f"success request, cluster ID {resp.json()['cluster_request_id']}")
+                resp_json = resp.json()
+                cluster_id = resp_json['cluster_request_id']
+                logging.info(f"success request, cluster ID {cluster_id}")
+                save_request_id(cluster_id, f"{self.cli_config.component} {' '.join(self.cli_config.cargs)}")
         except Exception as e:
             logging.error(f"failed to request: {e}")
 

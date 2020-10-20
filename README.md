@@ -6,25 +6,29 @@ This repository contains the workload and some utils to run those cases.
 
 ## usage
 
+Firstly, make a config file:
+
 ```bash
-bin/exec component [--dry-run] [args passing to main.go...] [-- [args passing to the component...]] 
+make ctl-build
 ```
 
-This command will make request to the default API server(172.16.5.110:8000), 
-then the API server would create a cluster and run the workload. 
+This command will set up python venv and install requirements needed. 
+There would also be a prompt asking you the s3 parameters. Current you can leave all unchanged.
 
-The server would response with a `cluster_id`, which can be used 
-by other utils then.
+> Hint:
+> You can always change the config by `bin/bench create_config`.
 
-### requirement
+```bash
+bin/bench exec component [--dry-run] [args passing to main.go...] [-- [args passing to the component...]] 
+```
 
-The binaries in `/bin` requires [`mc`](https://github.com/minio/mc) (to connect to minio) and `jq` (to create and edit json).
+This command will make request to the API server, then the API server would create a cluster and run the workload. 
 
+The server would response with a `cluster_id`, which can be used by other utils then.
 
-### binaries (WIP)
+### bench sub-commands (WIP)
 
-- `get_file [cluster_id] [filename]`: Get the output file of the test from the `minio` s3 endpoint. 
-(Need run `mc alias set minio http://172.16.4.18:30812 YOURACCESSKEY YOURSECRETKEY` firstly for the default API server).
+- `get_file [cluster_id] [filename]`: Get the output file of the test.
 - `get_cluster [cluster_id] [(info|metrics)]`: Get the cluster info, or grafana address.
 - `rebuild_metrics [cluster_id]`: Rebuild the grafana metrics. (WIP)
 
