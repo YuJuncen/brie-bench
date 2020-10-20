@@ -85,7 +85,7 @@ class ClusterRequest:
     def set_component(self, component: str):
         self.__add_args("--component", component)
         if component == "dumpling":
-            self["cluster_workload"]["restore_path"] = f"${self.config.workload_bucket}/${self.cli_config.workload}"
+            self.data["cluster_workload"]["restore_path"] = f"${self.config.workload_bucket}/${self.cli_config.workload}"
         return self
 
     def json(self) -> str:

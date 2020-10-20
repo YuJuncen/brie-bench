@@ -28,8 +28,8 @@ def prompt_config() -> Config:
     logging.info("dialing to s3 storage using the current config...")
     try:
         client = Minio(s3_endpoint, s3_access_key, s3_secret_key, secure=False)
-        print(f"Which bucket you store your workloads?")
         names = map(lambda b: b.name, client.list_buckets())
+        print(f"Which bucket you store your workloads?")
         # leave empty string here for not changed. mapping it to a user-friend string
         workload_bucket = select(["", *names], lambda b: b or "<not changed>") or old_config.workload_bucket
     except Exception as e:
