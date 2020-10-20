@@ -43,7 +43,7 @@ class FileReader:
     def select_file(self, dir: str) -> Object:
         dir = f"{dir}/" if not dir.endswith("/") else dir
         objs : List[Object] = list(self._client.list_objects(artifacts_bucket, dir))
-        print(f"{Fore.GREEN}{dir}{Fore.RESET}")
+        print(f"current path: {Fore.GREEN}{dir}{Fore.RESET}")
         new_obj = select(objs, lambda o: f"{last_part(o.object_name)}")
         if new_obj.is_dir:
             return self.select_file(f"{new_obj.object_name}")
@@ -67,9 +67,10 @@ class FileReader:
         if file is None:
             self.query_file(cluster)
             return
-        obj = self._client.get_object(artifacts_bucket, file)
+        artifact = self.get_artifacts_dir_of(cluster)
+        obj = self._client.get_object(artifacts_bucket, f"{artifact.object_name}{file}")
         for d in obj.stream(32 * 1024):
-            sys.stdout.write(d.encode('utf-8'))
+            sys.stdout.write(d.decode('utf-8'))
         
 
 

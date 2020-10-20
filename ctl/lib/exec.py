@@ -83,9 +83,12 @@ class ClusterRequest:
             self.__add_args("--cargs", arg)
         
     def set_component(self, component: str):
+        if not any(map(lambda c: c == component, ["br", "lightning", "dumpling"])):
+            logging.error(f"unsupported component {component}")
+
         self.__add_args("--component", component)
         if component == "dumpling":
-            self.data["cluster_workload"]["restore_path"] = f"${self.config.workload_bucket}/${self.cli_config.workload}"
+            self.data["cluster_workload"]["restore_path"] = f"{self.config.workload_bucket}/{self.cli_config.workload}"
         return self
 
     def json(self) -> str:

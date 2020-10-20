@@ -111,7 +111,7 @@ def read_int():
         return NOT_AN_NUMBER
 
 T = TypeVar('T')
-def select(items: Iterable[T], mapper : Callable[[T], str] = lambda x: x) -> str:
+def select(items: Iterable[T], mapper : Callable[[T], str] = lambda x: x) -> T:
     """
     select prompts user to select one item in the items.
     mapper maps the items to a printable string.
@@ -120,10 +120,10 @@ def select(items: Iterable[T], mapper : Callable[[T], str] = lambda x: x) -> str
         print(f"{i}) {mapper(item)}")
     print("#? ", end='')
     choice = read_int()
-    while choice is NOT_AN_NUMBER or choice >= len(items):
+    while choice is NOT_AN_NUMBER or choice is USER_ABORT or choice >= len(items):
         if choice is USER_ABORT:
             print("(aborted)")
-            exit(0)
+            exit(1) 
         print("(please, input a number in list)#? ", end='')
         choice = read_int()
     return items[choice]

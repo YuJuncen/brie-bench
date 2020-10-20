@@ -17,16 +17,19 @@ def get_id_of_record(record: str) -> int:
 
 def save_request_id(id: int, cmd: str):
     with open(saved_path, "a") as f:
-        f.write(f"{id}:{cmd}")
+        f.write(f"{id}:{cmd}\n")
 
 def get_last_request() -> int:
     with open(saved_path, "r") as f:
-        *_, last_line = f
-        return get_id_of_record(last_line)
+        try:
+            *_, last_line = f
+            return get_id_of_record(last_line)
+        except ValueError:
+            return -1
 
 def select_from_last_requests() -> int:
     requests = all_requests()
-    return get_id_of_record(select(requests))
+    return get_id_of_record(select(requests, lambda s: s.strip()))
 
 def from_cli_desc(cli: str) -> int:
     """
@@ -39,7 +42,11 @@ def from_cli_desc(cli: str) -> int:
     if cli is None or cli == "":
         return select_from_last_requests()
     if cli == ".":
-        return get_last_request()
+        last_request = get_last_request()
+        if last_request < 0:
+            logging.error("last request not found, hence '.' isn't allowed")
+            exit(1)
+        return last_request
     try:
         return int(cli)
     except:
