@@ -1,21 +1,22 @@
 package component
 
 import (
+	"os"
+	"path"
+	"reflect"
+	"strings"
+
 	"github.com/pingcap/log"
 	"github.com/yujuncen/brie-bench/workload/config"
 	"github.com/yujuncen/brie-bench/workload/utils"
 	"github.com/yujuncen/brie-bench/workload/utils/git"
 	"go.uber.org/zap"
-	"os"
-	"path"
-	"reflect"
-	"strings"
 )
 
 type Lightning struct{}
 
 func (l Lightning) DefaultRepo() string {
-	return "https://github.com/pingcap/lightning.git"
+	return "https://github.com/pingcap/tidb-lightning.git"
 }
 
 type LightningBin struct {

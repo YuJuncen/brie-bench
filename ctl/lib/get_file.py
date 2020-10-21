@@ -52,7 +52,7 @@ class FileReader:
     def query_file(self, cluster_id: int):
         artifact = self.get_artifacts_dir_of(cluster_id)
         if artifact is None:
-            logging.error(f"the cluster {cluster_id} seems has no artifacts, maybe it's doesn't end now?")
+            logging.error(f"the cluster {cluster_id} seems has no artifacts, maybe it hasn't end yet?")
             exit(1)
         obj = self.select_file(artifact.object_name)
         data = self._client.get_object(obj.bucket_name, obj.object_name)
@@ -69,9 +69,16 @@ class FileReader:
             return
         artifact = self.get_artifacts_dir_of(cluster)
         obj = self._client.get_object(artifacts_bucket, f"{artifact.object_name}{file}")
-        for d in obj.stream(32 * 1024):
-            sys.stdout.write(d.decode('utf-8'))
-        
+        try:
+            for d in obj.stream(32 * 1024):
+                    sys.stdout.write(d.decode('utf-8'))
+        except BrokenPipeError:
+            # broken pipe can happen when piping the result to utils like `head`,
+            # that isn't an error, ignoring it.
+            pass
+        finally:
+            obj.close()
+                    
 
 
 

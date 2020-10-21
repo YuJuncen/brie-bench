@@ -1,3 +1,4 @@
+import re
 from typing import Any, Callable, Iterable, List, NamedTuple, TypeVar
 from recordclass import recordclass
 import logging
@@ -38,7 +39,11 @@ CLIConfig = recordclass("CLIConfig", [
     ("dry_run", bool),
     ("workload", str),
     ("workload_storage", str),
+    ("cluster_version", str),
+    ("component_version", dict)
 ])
+
+version_flag = re.compile(r"--(tidb|tikv|pd)\.(version|hash)")
 
 def shift() -> str:
     """
@@ -63,6 +68,8 @@ def parse_cli(argv: List[str], conf : CLIConfig = None) -> CLIConfig:
         dry_run = False,
         workload = "",
         workload_storage = "",
+        cluster_version = "nightly",
+        component_version = {}
     )
     if len(argv) == 0:
         logging.error("please specify the component name")
@@ -81,14 +88,19 @@ def parse_cli(argv: List[str], conf : CLIConfig = None) -> CLIConfig:
         elif tag == '--workload-name':
             workload_name = shift()
             conf.workload = workload_name
-            conf.other_args.extend(["--workload-name", workload_name])
         elif tag == '--workload-storage':
             workload_storage = shift()
             conf.workload_storage = workload_storage
-            conf.other_args.extend(["--workload-storage", workload_storage])
         elif tag == '--':
             conf.cargs = argv
             argv = []
+        elif tag == '--cluster-version':
+            conf.cluster_version = shift()
+        elif re.match(version_flag, tag):
+            matcher = re.match(version_flag, tag)
+            component = matcher[1]
+            spec_type = matcher[2]
+            conf.component_version[component] = { spec_type: shift() }
         else:
             conf.other_args.append(tag)
     return conf
