@@ -42,14 +42,37 @@ bin/bench get_cluster . ｜ jq .status
 ```
 
 可以通过 get_file 获得测试相应的产物：
+```bash
 brie-bench$ bin/bench get_file .
-因为没有提供文件名，你可以在所有文件中选择。
+```
 
-{backup,restore}.log 是备份和恢复的日志。
-report.md 是测试的报告。
-stdout.log 是测试脚本的输出。
+因为没有提供文件名，你可以在所有文件中选择：
 
-IP 地址对应的文件夹是集群中相应组件的日志。
+```
+current path: 30124/5203328a-a08b-444e-a606-aeb54eaf7b76/
+0) cluster_info.txt
+1) env.txt
+2) grafana.tar.gz
+3) lightning-config.toml
+4) local.log
+5) prometheus.tar.gz
+6) report.md
+7) stdout.log
+8) workload.tar.gz
+9) 172.16.4.179/
+10) 172.16.4.181/
+11) 172.16.4.182/
+12) 172.16.4.198/
+#? 
+```
+
+其中：
+
+* {backup,restore}.log 是备份和恢复的日志。
+* report.md 是测试的报告。
+* stdout.log 是测试脚本的输出。
+* IP 地址对应的文件夹是集群中相应组件的日志。
+
 如果需要和其他命令行工具联动，可以直接提供文件名，例如：
 ```bash
 bin/bench get_file . restore.log | grep "summary"

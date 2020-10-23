@@ -145,12 +145,15 @@ def prompt_ok(prompt: str, default: bool = True) -> bool:
     prompt_ok prompts the user for a boolean value.
     """
     hint = "[Y/n]" if default else "[y/N]"
-    i = input(f"{prompt} {hint} ")
-    if i.lower() == 'y':
-        return True
-    if i.lower() == 'n':
-        return False
-    if i == '':
+    try:
+        i = input(f"{prompt} {hint} ")
+        if i.lower() == 'y':
+            return True
+        if i.lower() == 'n':
+            return False
+        if i == '':
+            return default
+    except: # on eof or ^C
         return default
     
     print("(please input y or n) ")
