@@ -27,7 +27,7 @@ func CloneHash(remote, to, hash string) (*Repo, error) {
 	return repo, nil
 }
 
-// CloneHash clones the remote repository.
+// Clone clones the remote repository.
 func Clone(remote, to string) (*Repo, error) {
 	if to == "" {
 		var err error

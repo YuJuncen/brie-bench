@@ -74,7 +74,7 @@ func (command *Command) Run() error {
 	stderr := bytes.NewBuffer([]byte{})
 	cmd := exec.Command(command.path, command.args...)
 	command.beforeRun(cmd)
-	if !config.C.DropStdout {
+	if config.C.SaveStdout {
 		cmd.Stdout = CombineWriters(cmd.Stdout, stdout)
 		cmd.Stderr = CombineWriters(cmd.Stderr, stderr)
 	}
@@ -85,7 +85,7 @@ func (command *Command) Run() error {
 		env := new(bytes.Buffer)
 		_ = DumpEnvTo(env)
 		log.Info("config", zap.Any("config", config.C), zap.Stringer("env", env))
-		if !config.C.DropStdout {
+		if config.C.SaveStdout {
 			log.Info("stderr", zap.Stringer("data", stderr))
 			log.Info("stdout", zap.Stringer("data", stdout))
 		}

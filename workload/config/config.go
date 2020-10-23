@@ -14,7 +14,7 @@ type Config struct {
 	DebugComponent   bool
 	Disturbance      bool
 	TemporaryStorage string
-	DropStdout       bool
+	SaveStdout       bool
 
 	ComponentArgs []string
 
@@ -69,7 +69,7 @@ func Init() {
 	flag.StringSliceVar(&C.ComponentArgs, "cargs", []string{}, "(unsafe) pass extra argument to the component, may conflict with args provided by the framework")
 	flag.StringVar(&C.TemporaryStorage, "temp-storage", "", "(with br syntax) specify the storage where the intermedia data stores")
 
-	flag.BoolVar(&C.DropStdout, "drop-stdout", true, "drop stdout and stderr of the component, disable this allows more detailed log when failed")
+	flag.BoolVar(&C.SaveStdout, "save-stdout", true, "save stdout and stderr of the component, allowing more detailed log when failed")
 	flag.BoolVar(&C.Dumpling.SkipCSV, "dumpling.skip-csv", false, "skip dumpling to csv step in dumpling benching")
 	flag.BoolVar(&C.Dumpling.SkipSQL, "dumpling.skip-sql", false, "skip dumpling to sql step in dumpling benching")
 	flag.BoolVar(&C.BR.SkipBackup, "br.skip-backup", false, "skip the backup step of br benching")
