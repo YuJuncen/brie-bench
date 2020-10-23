@@ -1,11 +1,12 @@
 package git
 
 import (
-	"github.com/yujuncen/brie-bench/workload/utils"
 	"os"
+
+	"github.com/yujuncen/brie-bench/workload/utils"
 )
 
-// Repo is a github repo that be cloned to local.
+// Repo is a github repo that has been cloned to local.
 type Repo struct {
 	remote string
 	local  string
@@ -49,7 +50,7 @@ func (r *Repo) ResetHard(hash string) error {
 		Run()
 }
 
-// Make run the `make` command in the local repository.
+// Make runs the `make` command in the local repository.
 func (r *Repo) Make(targets ...string) error {
 	return utils.NewCommand("make", targets...).
 		Opt(utils.WorkDir(r.local)).

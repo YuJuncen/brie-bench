@@ -27,6 +27,7 @@ range-concurrency = %d
 `
 )
 
+// LightningConf is the [lightning] part in lightning config file
 type LightningConf struct {
 	IndexConcurrency uint
 	TableConcurrency uint
@@ -35,6 +36,7 @@ type LightningConf struct {
 	PromAddress string
 }
 
+// NewLightningConf creates a default LightningConf
 func NewLightningConf() *LightningConf {
 	return &LightningConf{
 		IndexConcurrency: 2,
@@ -43,11 +45,13 @@ func NewLightningConf() *LightningConf {
 	}
 }
 
+// To writes the toml format of config to a writer
 func (conf *LightningConf) To(w io.Writer) error {
 	_, err := fmt.Fprintf(w, basic, conf.IndexConcurrency, conf.TableConcurrency, conf.IOConcurrency)
 	return err
 }
 
+// LocalBackendConf is the []
 type LocalBackendConf struct {
 	RegionSplitSize  uint
 	SendKVPairs      uint

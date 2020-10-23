@@ -2,16 +2,20 @@ package utils
 
 import (
 	"fmt"
-	"github.com/yujuncen/brie-bench/workload/config"
 	"io"
 	"os"
 	"path"
+
+	"github.com/yujuncen/brie-bench/workload/config"
 )
 
 const (
+	// ClusterInfoFile is the file for storing cluster info.
 	ClusterInfoFile = "cluster_info.txt"
-	EnvInfoFile     = "env.txt"
-	infoFormat      = `Cluster ID: %20s
+	// EnvInfoFile is the file for storing environment variables.
+	EnvInfoFile = "env.txt"
+	// infoFormat is the format for cluster info.
+	infoFormat = `Cluster ID: %20s
 Cluster name: %20s
 PD address: %20s
 TiDB address: %20s
@@ -20,6 +24,7 @@ API server address: %20s
 `
 )
 
+// DumpCluster dumps the cluster by the context to ClusterInfoFile.
 func DumpCluster(c *BenchContext) error {
 	file, err := os.Create(path.Join(config.Artifacts, ClusterInfoFile))
 	if err != nil {
@@ -29,6 +34,7 @@ func DumpCluster(c *BenchContext) error {
 	return err
 }
 
+// DumpEnvTo dump environment vairbales to the writer.
 func DumpEnvTo(file io.Writer) error {
 	for _, env := range os.Environ() {
 		if _, e := fmt.Fprintln(file, env); e != nil {
@@ -38,6 +44,7 @@ func DumpEnvTo(file io.Writer) error {
 	return nil
 }
 
+// DumpEnv dumps the environment vairbales to the EnvInfoFile.
 func DumpEnv() error {
 	file, err := os.Create(path.Join(config.Artifacts, EnvInfoFile))
 	if err != nil {

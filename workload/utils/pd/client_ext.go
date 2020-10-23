@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/pingcap/log"
-	"go.uber.org/zap"
 	"io/ioutil"
 	"net/http"
 	"strings"
+
+	"github.com/pingcap/log"
+	"go.uber.org/zap"
 )
 
 const (
@@ -16,6 +17,7 @@ const (
 )
 
 var (
+	// Schedulers is the random disturbance schedulers.
 	Schedulers = []string{
 		"shuffle-leader-scheduler",
 		"shuffle-region-scheduler",
@@ -23,16 +25,19 @@ var (
 	}
 )
 
+// ClientExt is a mixin with some PD functions for http.Client.
 type ClientExt struct {
 	*http.Client
 }
 
+// DefaultClient is the default PD client.
 var DefaultClient = ClientExt{http.DefaultClient}
 
 func isOk(status int) bool {
 	return status/100 == 2
 }
 
+// EnableScheduler enable the specficated schedulers.
 func (c ClientExt) EnableScheduler(pdAddrs []string, schedulers ...string) error {
 	for _, pd := range pdAddrs {
 		for _, scheduler := range schedulers {

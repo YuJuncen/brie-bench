@@ -4,6 +4,7 @@ import (
 	flag "github.com/spf13/pflag"
 )
 
+// Config is the config for the workload
 type Config struct {
 	Component        string
 	Hash             string
@@ -13,6 +14,7 @@ type Config struct {
 	DebugComponent   bool
 	Disturbance      bool
 	TemporaryStorage string
+	DropStdout       bool
 
 	ComponentArgs []string
 
@@ -21,15 +23,18 @@ type Config struct {
 	Lightning Lightning
 }
 
+// BR is the config for BR.
 type BR struct {
 	SkipBackup bool
 }
 
+// Dumpling is the config for dumpling.
 type Dumpling struct {
 	SkipCSV bool
 	SkipSQL bool
 }
 
+// Lightning is the config for tidb-lightning.
 type Lightning struct {
 	Backend string
 
@@ -45,6 +50,7 @@ type Lightning struct {
 // C is the global config object
 var C Config
 
+// Init initializes the config.
 func Init() {
 	flag.UintVar(&C.Lightning.IndexConcurrency, "lightning.index-concurrency", 0, "lightning.index-concurrency")
 	flag.UintVar(&C.Lightning.IOConcurrency, "lightning.io-concurrency", 0, "lightning.io-concurrency")
@@ -63,6 +69,7 @@ func Init() {
 	flag.StringSliceVar(&C.ComponentArgs, "cargs", []string{}, "(unsafe) pass extra argument to the component, may conflict with args provided by the framework")
 	flag.StringVar(&C.TemporaryStorage, "temp-storage", "", "(with br syntax) specify the storage where the intermedia data stores")
 
+	flag.BoolVar(&C.DropStdout, "drop-stdout", true, "drop stdout and stderr of the component, disable this allows more detailed log when failed")
 	flag.BoolVar(&C.Dumpling.SkipCSV, "dumpling.skip-csv", false, "skip dumpling to csv step in dumpling benching")
 	flag.BoolVar(&C.Dumpling.SkipSQL, "dumpling.skip-sql", false, "skip dumpling to sql step in dumpling benching")
 	flag.BoolVar(&C.BR.SkipBackup, "br.skip-backup", false, "skip the backup step of br benching")

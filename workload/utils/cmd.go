@@ -2,16 +2,18 @@ package utils
 
 import (
 	"bytes"
+	"os"
+	"os/exec"
+
 	"github.com/pingcap/log"
 	"github.com/yujuncen/brie-bench/workload/config"
 	"go.uber.org/zap"
-	"io"
-	"os"
-	"os/exec"
 )
 
+// CommandOpt is an option for a command.
 type CommandOpt func(command *exec.Cmd)
 
+// Command is a runnable bash command.
 type Command struct {
 	path string
 	args []string
@@ -19,6 +21,7 @@ type Command struct {
 	beforeRun CommandOpt
 }
 
+// NewCommand creates a command.
 func NewCommand(path string, args ...string) *Command {
 	return &Command{path: path, args: args, beforeRun: func(cmd *exec.Cmd) {}}
 }
@@ -42,7 +45,7 @@ func WorkDir(dir string) CommandOpt {
 	}
 }
 
-// Redirect equals `command 2>&1 >$dir`
+// RedirectTo equals `command 2>&1 >$dir`
 func RedirectTo(dir string) CommandOpt {
 	return func(command *exec.Cmd) {
 		file, err := os.Create(dir)
@@ -55,8 +58,8 @@ func RedirectTo(dir string) CommandOpt {
 var (
 	// DropOutput drops the output of the command (Default).
 	DropOutput CommandOpt = func(command *exec.Cmd) {
-		command.Stdout = NOPIO
-		command.Stderr = NOPIO
+		command.Stdout = nil
+		command.Stderr = nil
 	}
 	// SystemOutput redirect the output to stdin / stdout.
 	SystemOutput CommandOpt = func(command *exec.Cmd) {
@@ -65,15 +68,16 @@ var (
 	}
 )
 
+// Run runs the command.
 func (command *Command) Run() error {
-	stdout := new(bytes.Buffer)
-	stderr := new(bytes.Buffer)
+	stdout := bytes.NewBuffer([]byte{})
+	stderr := bytes.NewBuffer([]byte{})
 	cmd := exec.Command(command.path, command.args...)
-	cmd.Stdout = NOPIO
-	cmd.Stderr = NOPIO
 	command.beforeRun(cmd)
-	cmd.Stdout = io.MultiWriter(cmd.Stdout, stdout)
-	cmd.Stderr = io.MultiWriter(cmd.Stderr, stderr)
+	if !config.C.DropStdout {
+		cmd.Stdout = CombineWriters(cmd.Stdout, stdout)
+		cmd.Stderr = CombineWriters(cmd.Stderr, stderr)
+	}
 	log.Info("executing", zap.Stringer("command", cmd))
 	err := cmd.Run()
 	if err != nil {
@@ -81,12 +85,15 @@ func (command *Command) Run() error {
 		env := new(bytes.Buffer)
 		_ = DumpEnvTo(env)
 		log.Info("config", zap.Any("config", config.C), zap.Stringer("env", env))
-		log.Info("stderr", zap.Stringer("data", stderr))
-		log.Info("stdout", zap.Stringer("data", stdout))
+		if !config.C.DropStdout {
+			log.Info("stderr", zap.Stringer("data", stderr))
+			log.Info("stdout", zap.Stringer("data", stdout))
+		}
 	}
 	return err
 }
 
+// Must asserts the error is non-nil.
 func Must(e error) {
 	if e != nil {
 		log.Panic("meet error", zap.Error(e))

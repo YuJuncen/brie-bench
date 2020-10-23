@@ -13,20 +13,25 @@ import (
 	"go.uber.org/zap"
 )
 
+// Lightning is the component tidb-lightning
 type Lightning struct{}
 
+// DefaultRepo implements Component
 func (l Lightning) DefaultRepo() string {
 	return "https://github.com/pingcap/tidb-lightning.git"
 }
 
+// LightningBin is a complied lightning
 type LightningBin struct {
 	binary string
 }
 
+// NewLightning creates a new tidb-lightning component.
 func NewLightning() Component {
 	return Lightning{}
 }
 
+// MakeOptionsWith implements Binary.
 func (l *LightningBin) MakeOptionsWith(cluster *utils.BenchContext) interface{} {
 	conf := cluster.Config
 	var backend LightningBackend
@@ -50,18 +55,23 @@ func (l *LightningBin) MakeOptionsWith(cluster *utils.BenchContext) interface{} 
 	}
 }
 
+// LightningWorkload is a workload spec for lightning
 type LightningWorkload struct {
 	Name   string
 	Source string
 }
 
+// LightningBackend is the enum for supported lightning backends.
 type LightningBackend int
 
 const (
+	// Local is for local backend.
 	Local LightningBackend = iota
+	// TiDB is for TiDB backend.
 	TiDB
 )
 
+// LightningOpts is run options for lightning
 type LightningOpts struct {
 	Backend  LightningBackend
 	Workload LightningWorkload
@@ -72,6 +82,7 @@ type LightningOpts struct {
 	Extra []string
 }
 
+// ImportLocal use lightning local backend to import the workload.
 func (l *LightningBin) ImportLocal(opts LightningOpts) error {
 	addr, port, err := utils.HostAndPort(opts.Cluster.TidbAddr)
 	if err != nil {
@@ -107,6 +118,7 @@ func (l *LightningBin) ImportLocal(opts LightningOpts) error {
 	return opts.Cluster.Report.Bench("import with local backend", cmd.Run)
 }
 
+// ImportTiDB use lightning TiDB backend to import the workload.
 func (l *LightningBin) ImportTiDB(opts LightningOpts) error {
 	addr, port, err := utils.HostAndPort(opts.Cluster.TidbAddr)
 	if err != nil {
@@ -134,6 +146,7 @@ func (l *LightningBin) ImportTiDB(opts LightningOpts) error {
 	return opts.Cluster.Report.Bench("import with TiDB backend", cmd.Run)
 }
 
+// Run runs lightning.
 func (l *LightningBin) Run(opts interface{}) error {
 	opt, ok := opts.(LightningOpts)
 	if !ok {
@@ -152,6 +165,7 @@ func (l *LightningBin) Run(opts interface{}) error {
 	return nil
 }
 
+// Build builds the lightning component.
 func (l Lightning) Build(opts BuildOptions) (Binary, error) {
 	repo, err := git.CloneHash(opts.Repository, "/lightning", opts.Hash)
 	if err != nil {
