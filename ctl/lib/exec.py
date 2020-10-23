@@ -117,6 +117,9 @@ class ClusterRequest:
         return self
 
     def set_workload(self, workload_name: str, workload_storage: str = ""):
+        if workload_name == "":
+            logging.error("--workload-name must be specified.")
+            exit(1)
         self.workload = workload_name
         self.__add_args("--workload-name", workload_name)
         workload_storage = workload_storage or f"s3://{self.config.workload_bucket}/{self.cli_config.workload}?{s3_args(self.config)}"
@@ -145,8 +148,12 @@ class ClusterRequest:
             self.__add_args("--cargs", arg)
         
     def set_component(self, component: str):
-        if not any(map(lambda c: c == component, ["br", "lightning", "dumpling"])):
+        component = component.lower()
+        if component == 'tidb-lightning':
+            component = 'lightning'
+        if component not in ["br", "lightning", "dumpling"]:
             logging.error(f"unsupported component {component}")
+            exit(1)
 
         self.__add_args("--component", component)
         if component == "dumpling":
