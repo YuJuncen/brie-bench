@@ -22,6 +22,8 @@ component_path = {
 hex_chars = re.compile('[0-9a-fA-F]+')
 
 def addv(version: str) -> str:
+    if version == "nightly":
+        return version
     if not version.startswith('v'):
         return f"v{version}"
     return version
