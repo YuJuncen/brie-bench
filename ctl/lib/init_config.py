@@ -21,8 +21,8 @@ def prompt_config() -> Config:
     old_config = get_config()
     show_config(old_config)
     print(f"{Fore.GREEN}you can leave any field empty to leave this field untouched then.{Fore.RESET}")
-    api_server = input("Please input your api server: ") or old_config.api_server
-    s3_endpoint = input("Please input your s3 endpoint (without http:// prefix, TLS isn't supported for now): ") or old_config.s3_endpoint
+    api_server = (input("Please input your api server: ") or old_config.api_server).strip()
+    s3_endpoint = (input("Please input your s3 endpoint (without http:// prefix, TLS isn't supported for now): ") or old_config.s3_endpoint).strip()
     s3_access_key = input("Please input your s3 access key: ") or old_config.s3_access_key
     s3_secret_key = getpass("Please input your s3 secret access key: ") or old_config.s3_secret_key
     logging.info("dialing to s3 storage using the current config...")

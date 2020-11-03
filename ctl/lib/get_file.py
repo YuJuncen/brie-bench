@@ -51,8 +51,7 @@ class FileReader:
     def get_artifacts_dir_of(self, cluster_id: int) -> Object:
         objs = list(self.get_client().list_objects(artifacts_bucket, f"{cluster_id}/"))
         if len(objs) == 0:
-            if len(objs) == 0:
-                return None
+            return None
         if len(objs) > 1:
             return select(objs, lambda o: f"{o.object_name.strip('/')}")
         return objs[0]
