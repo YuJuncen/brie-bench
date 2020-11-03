@@ -1,5 +1,5 @@
 import logging
-from .cli_parse import Config, select, shift
+from .cli_parse import Config, select, shift, default_config
 from .saved_clusters import from_cli_desc
 from typing import List
 from colorama import Fore
@@ -11,7 +11,6 @@ import sys
 
 # TODO allow artifacts bucket configurable
 artifacts_bucket = "artifacts"
-api_server_minio = "172.16.4.4:30812"
 
 def last_part(path: str) -> str :
     """
@@ -28,11 +27,15 @@ def last_part(path: str) -> str :
 class FileReader:
     def __init__(self, config: Config):
         self._config = config
+        self._default_config = default_config()
         self._client = Minio(config.s3_endpoint,
             access_key=config.s3_access_key,
             secret_key=config.s3_secret_key,
             secure=False)
-        self._api_server_client = Minio(api_server_minio, secure=False)
+        self._api_server_client = Minio(self._default_config.s3_endpoint,
+            access_key=self._default_config.s3_access_key,
+            secret_key=self._default_config.s3_secret_key,
+            secure=False)
         self.use_self_client = True
 
     def set_client(self, cluster_id: int):
